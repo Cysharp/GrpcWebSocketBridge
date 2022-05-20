@@ -1,0 +1,28 @@
+﻿@page "/duplex"
+<h3>DuplexStreaming</h3>
+
+<div>
+    @if (_connecting)
+    {
+        <span>Connecting...</span>
+    }
+    else
+    {
+        <div><label for="name">User</label>: <input id="name" type="text" @bind="_name" /></div>
+        <button @onclick="ConnectAsync">Connect</button>
+    }
+</div>
+
+@if (_exception is not null)
+{
+    <h4>Exception</h4>
+    <pre><code>@_exception.ToString()</code></pre>
+}
+
+<h4>Response</h4>
+<ul>
+    @foreach (var response in _responses)
+    {
+        <li>@response.Message</li>
+    }
+</ul>

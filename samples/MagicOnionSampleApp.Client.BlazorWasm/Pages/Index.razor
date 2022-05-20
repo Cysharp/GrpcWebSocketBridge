@@ -1,0 +1,32 @@
+﻿@page "/"
+
+<PageTitle>Index</PageTitle>
+
+@if (!_isConnecting)
+{
+    <div>
+        Nickname: <input type="text" @bind="_nickname" /> <button @onclick="ConnectAndJoinAsync">Connect</button>
+    </div>
+    @if (_exception is not null)
+    {
+        <h4>Exception</h4>
+        <pre><code>@_exception.ToString()</code></pre>
+    }
+}
+else
+{
+    <div>Connecting</div>
+    <form @onsubmit="SendAsync"><input type="text" @bind="_inputMessage" /> <button type="submit">Send</button></form>
+    <table>
+        <tbody>
+            @foreach (var message in _messages.Reverse())
+            {
+                <tr @key="message.Id">
+                    <td style="color: #aaa;padding-right: 1rem;">@message.ReceivedAt.ToString("t")</td>
+                    <td style="font-weight: bold;padding-right: 1rem;text-align: right;">@message.Nickname</td>
+                    <td>@message.Message</td>
+                </tr>
+            }
+        </tbody>
+    </table>
+}

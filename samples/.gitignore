@@ -1,0 +1,6 @@
+*.Unity/*.sln
+*.Unity/*.csproj
+*.Unity/Temp/*
+*.Unity/Library/*
+*.Unity/Logs/*
+!*.Unity/Packages/*

@@ -1,0 +1,17 @@
+<Project Sdk="Microsoft.NET.Sdk">
+
+  <PropertyGroup>
+    <TargetFrameworks>net5.0;net6.0</TargetFrameworks>
+    <Nullable>enable</Nullable>
+  </PropertyGroup>
+
+  <ItemGroup>
+    <FrameworkReference Include="Microsoft.AspNetCore.App" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <Compile Include="..\GrpcWebSocketBridge.Shared\**\*.cs" Exclude="..\GrpcWebSocketBridge.Shared\**\AssemblyInfo.cs;..\GrpcWebSocketBridge.Shared\**\obj\**;..\GrpcWebSocketBridge.Shared\**\bin\**;" LinkBase="Shared" />
+    <None Include="..\Icon.png" Pack="true" PackagePath="/" />
+  </ItemGroup>
+
+</Project>

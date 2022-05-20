@@ -1,0 +1,34 @@
+﻿<Project Sdk="Microsoft.NET.Sdk">
+ 
+  <PropertyGroup>
+    <TargetFramework>netstandard2.0</TargetFramework>
+  </PropertyGroup>
+
+  <ItemGroup>
+      <None Remove="**\package.json" />
+      <None Remove="**\*.asmdef" />
+      <None Remove="**\*.meta" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <PackageReference Include="MagicOnion.Abstractions" Version="4.5.0" />
+  </ItemGroup>
+
+  <Target Name="RestoreLocalTools" BeforeTargets="GenerateMessagePack;GenerateMagicOnion">
+    <Exec Command="dotnet tool restore" />
+  </Target>
+
+  <Target Name="GenerateMessagePack" AfterTargets="Build">
+    <PropertyGroup>
+      <_MessagePackGeneratorArguments>-i ./MagicOnionSampleApp.Shared.csproj -o ../MagicOnionSampleApp.Client.Unity/Assets/Scripts/Generated/MessagePack.Generated.cs</_MessagePackGeneratorArguments>
+    </PropertyGroup>
+    <Exec Command="dotnet tool run mpc $(_MessagePackGeneratorArguments)" />
+  </Target>
+  <Target Name="GenerateMagicOnion" AfterTargets="Build">
+    <PropertyGroup>
+      <_MagicOnionGeneratorArguments>-i ./MagicOnionSampleApp.Shared.csproj -o ../MagicOnionSampleApp.Client.Unity/Assets/Scripts/Generated/MagicOnion.Generated.cs</_MagicOnionGeneratorArguments>
+    </PropertyGroup>
+    <Exec Command="dotnet tool run dotnet-moc $(_MagicOnionGeneratorArguments)" />
+  </Target>
+
+</Project>

@@ -1,0 +1,7 @@
+<SlnMergeSettings>
+    <MergeTargetSolution>..\..\GrpcWebSocketBridge.sln</MergeTargetSolution>
+    <NestedProjects>
+        <NestedProject ProjectName="Assembly-CSharp*" FolderPath="Samples/MagicOnionSampleApp" />
+        <NestedProject ProjectName="MagicOnionSampleApp.Shared.Unity" FolderPath="Samples/MagicOnionSampleApp" />
+    </NestedProjects>
+</SlnMergeSettings>

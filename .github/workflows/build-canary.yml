@@ -1,0 +1,80 @@
+name: Build (Canary)
+
+on:
+  push:
+    branches:
+      - "master"
+    tags:
+      - "!*" # not a tag push
+    paths-ignore:
+      - ".github/**"
+      - "docs/**"
+      - "**/*.md"
+env:
+  DOTNET_CLI_TELEMETRY_OPTOUT: 1
+  DOTNET_SKIP_FIRST_TIME_EXPERIENCE: 1
+  NUGET_XMLDOC_MODE: skip
+  NUGET_CREDENTIALPROVIDER_SESSIONTOKENCACHE_ENABLED: true
+  DISABLE_NETFX_TARGET_BUILD: 1
+      
+jobs:
+  canary-build:
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    steps:
+      - uses: actions/checkout@v2
+      - uses: actions/setup-dotnet@v1
+        with:
+          dotnet-version: |
+            3.1.x
+            5.0.x
+            6.0.x
+      - run: echo "PACKAGE_VERSION=ci-$(date '+%Y%m%d-%H%M%S')+${GITHUB_SHA:0:6}" >> $GITHUB_ENV
+      - run: echo "PACKAGE_VERSION=${PACKAGE_VERSION}"
+      # Build
+      - run: dotnet build ./src/GrpcWebSocketBridge.AspNetCore/ -c Release -p:VersionSuffix=${PACKAGE_VERSION}
+      - run: dotnet build ./src/GrpcWebSocketBridge.Client/ -c Release -p:VersionSuffix=${PACKAGE_VERSION}
+      # Test
+      - run: dotnet test ./tests/GrpcWebSocketBridge.Tests/ -c Debug
+      # Pack
+      - run: dotnet pack ./src/GrpcWebSocketBridge.AspNetCore/GrpcWebSocketBridge.AspNetCore.csproj -c Release --include-symbols --include-source --no-build -p:VersionSuffix=${PACKAGE_VERSION} -o ./publish/
+      - run: dotnet pack ./src/GrpcWebSocketBridge.Client/GrpcWebSocketBridge.Client.csproj -c Release --include-symbols --include-source --no-build -p:VersionSuffix=${PACKAGE_VERSION} -o ./publish/
+      - uses: actions/upload-artifact@v1
+        with:
+          name: nuget
+          path: ./publish/
+
+  canary-build-grpc-dotnet:
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    steps:
+      - uses: actions/checkout@v2
+      - uses: actions/setup-dotnet@v1
+        with:
+          dotnet-version: 6.0.x
+      - run: echo "PACKAGE_VERSION=ci-$(date '+%Y%m%d-%H%M%S')+${GITHUB_SHA:0:6}" >> $GITHUB_ENV
+      # Publish
+      - run: dotnet publish -f netstandard2.0 -c Release -o ./publish/Grpc.Net.Client/ ./src/External/Grpc.Net.Client
+      - uses: actions/upload-artifact@v1
+        with:
+          name: Grpc.Net.Client-ModifiedForWebGL.zip
+          path: ./publish/
+
+  canary-push:
+    needs: [canary-build]
+    runs-on: ubuntu-latest
+    timeout-minutes: 5
+    steps:
+      - uses: actions/setup-dotnet@v1
+        with:
+          dotnet-version: |
+            3.1.x
+            5.0.x
+            6.0.x
+      - uses: actions/download-artifact@v2
+      # Upload to NuGet
+      - run: echo "VSS_NUGET_EXTERNAL_FEED_ENDPOINTS=${FEED_ENDPOINTS}" >> $GITHUB_ENV
+        env:
+          FEED_ENDPOINTS: ${{ secrets.VSS_NUGET_EXTERNAL_FEED_ENDPOINTS_PUBLIC_CANARY }}
+      - run: wget -qO- https://raw.githubusercontent.com/Microsoft/artifacts-credprovider/master/helpers/installcredprovider.sh | bash
+      - run: dotnet nuget push "./nuget/*.nupkg" --skip-duplicate -s https://pkgs.dev.azure.com/cysharp/Public/_packaging/Canary-Build/nuget/v2 -k AzureDevOps

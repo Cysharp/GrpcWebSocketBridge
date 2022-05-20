@@ -1,0 +1,25 @@
+<Project>
+  <Import Project="build\sources.props" />
+  <Import Project="build\dependencies.props" />
+  <Import Project="build\version.props" />
+
+  <PropertyGroup>
+    <!-- Set versions for all projects. Avoids warnings from non-preview projects referencing preview projects -->
+    <Version>$(GrpcDotnetVersion)</Version>
+    <AssemblyVersion>$(GrpcDotnetAssemblyVersion)</AssemblyVersion>
+    <FileVersion>$(GrpcDotnetAssemblyFileVersion)</FileVersion>
+
+    <AssemblyOriginatorKeyFile>$(MSBuildThisFileDirectory)keys\Grpc.snk</AssemblyOriginatorKeyFile>
+    <SignAssembly>false</SignAssembly>
+    <TreatWarningsAsErrors>true</TreatWarningsAsErrors>
+    <CheckEolTargetFramework>false</CheckEolTargetFramework>
+
+    <!-- Don't make missing XML docs a fatal build error, but still surface so we have visibility into undocumented APIs. -->
+    <WarningsNotAsErrors>$(WarningsNotAsErrors);CS1591</WarningsNotAsErrors>
+
+    <EmbedUntrackedSources>true</EmbedUntrackedSources>
+    <LangVersion>9.0</LangVersion>
+    <Nullable>enable</Nullable>
+  </PropertyGroup>
+
+</Project>

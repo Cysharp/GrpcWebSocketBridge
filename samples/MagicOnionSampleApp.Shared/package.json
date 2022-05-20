@@ -1,0 +1,7 @@
+{
+  "name": "com.cysharp.grpcwebsocketbridge.samples.magiconionsampleapp.shared.unity",
+  "version": "1.0.0",
+  "displayName": "MagicOnionSampleApp.Shared.Unity",
+  "description": "MagicOnionSampleApp.Shared.Unity",
+  "unity": "2019.1"
+}
