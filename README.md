@@ -124,6 +124,8 @@ For gRPC-related and dependent libraries, extract and add assemblies for netstan
 
 **NOTE:** If you want to build your application for WebGL, you need to install custom versions of Grpc.Net.Client and Grpc.Net.Common by Cysharp. Those assemblies are available from GitHub Release page.
 
+GrpcWebSocketBridge for Unity also requires [UniTask](https://github.com/Cysharp/UniTask), so the package needs to be installed. See [package installation instructions.](https://github.com/Cysharp/UniTask#upm-package)
+
 #### Use GrpcWebSocketBridge handler with GrpcChannel
 Change the code for gRPC channel creation from C-core gRPC to code for using grpc-dotnet and WebSockets.
 
