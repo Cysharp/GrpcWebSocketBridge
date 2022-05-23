@@ -29,6 +29,14 @@ Yet Another gRPC over HTTP/1 using WebSocket implementation, primarily targets .
 - Unity 2019.4 or later
   - We recommend a newer version when trying WebGL builds, as older versions, even 2019.4, have behavioural issues (we confirmed this with 2019.4.26f1).
 
+## How to run a sample project
+
+The repository contains sample projects. You can run a simple sample app (Unity WebGL) as follows.
+
+- Move the current directory to `samples\GrpcSampleApp.Server\`
+- Execute `dotnet run`
+- Open https://localhost:7172/index.html in a browser.
+
 ## Getting started
 ### Server
 #### Install `GrpcWebSocketBridge.AspNetCore` package
