@@ -134,8 +134,8 @@ jobs:
         uses: actions/download-artifact@v3
         with:
           path: artifacts
-      #- name: Upload to NuGet
-      #  run: dotnet nuget push "./artifacts/nuget/*.nupkg" --skip-duplicate -s https://www.nuget.org/api/v2/package -k ${{ secrets.NUGET_KEY }}
+      - name: Publish to NuGet
+        run: dotnet nuget push "./artifacts/nuget/*.nupkg" --skip-duplicate -s https://www.nuget.org/api/v2/package -k ${{ secrets.NUGET_KEY }}
 
   create-release:
     if: github.event.inputs.dry_run == 'false'
