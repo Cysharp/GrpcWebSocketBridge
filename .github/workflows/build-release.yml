@@ -34,8 +34,7 @@ jobs:
           version: ${{ env.GIT_TAG }}
           target-path: src/GrpcWebSocketBridge.Client.Unity/Assets/Plugins/GrpcWebSocketBridge/package.json
           github-token: ${{ secrets.GITHUB_TOKEN }}
-          dry-run: true
-          #dry-run: ${{ env.DRY_RUN }}
+          dry-run: ${{ env.DRY_RUN }}
 
   build:
     name: 'Build & pack GrpcWebSocketBridge'
