@@ -7,8 +7,8 @@
         var connection = {
             id: connectionsSequence++,
             socket: null,
-            url: Pointer_stringify(url),
-            subProtocol: Pointer_stringify(subProtocol),
+            url: UTF8ToString(url),
+            subProtocol: UTF8ToString(subProtocol),
             onReceive: null,
             onClose: null,
             onConnected: null
@@ -46,7 +46,7 @@
 
     /* void JsWebSocket_Close(int handle, int code, string reason) */
     JsWebSocket_Close: function (handle, code, reason) {
-        connections[handle].socket.close(code, Pointer_stringify(reason));
+        connections[handle].socket.close(code, UTF8ToString(reason));
     },
 
     /* void JsWebSocket_RegisterReceiveCallback(int handle, Action<int, IntPtr, int> callback) */
