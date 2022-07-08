@@ -1,4 +1,4 @@
-﻿#region Copyright notice and license
+#region Copyright notice and license
 
 // Copyright 2019 The gRPC Authors
 //
@@ -33,7 +33,10 @@ namespace Grpc.Net.Client.Internal
 
         private OperatingSystem()
         {
-            IsBrowser = RuntimeInformation.IsOSPlatform(OSPlatform.Create("browser"));
+            // NOTE(Cysharp): Some versions of Unity WebGL throw NotSupportedException.
+            // https://issuetracker.unity3d.com/issues/notsupportedexception-thrown-when-calling-any-member-of-system-dot-runtime-dot-interopservices-dot-runtimeinformation-in-webgl
+            // https://github.com/Cysharp/GrpcWebSocketBridge/issues/2
+            IsBrowser = true; // RuntimeInformation.IsOSPlatform(OSPlatform.Create("browser"));
         }
     }
 }
