@@ -17,6 +17,16 @@
 
 #endregion
 
+// NET_STANDARD is .NET Standard 2.1 on Unity
+#if NET_STANDARD_2_0
+#define NETSTANDARD2_0
+#endif
+#if NET_STANDARD || NET_STANDARD_2_1
+#define NETSTANDARD2_1
+#undef NETSTANDARD2_0 // NOTE: Same symbols defined as in .NET SDK
+#pragma warning disable CS8632 // The annotation for nullable reference types should only be used in code within a '#nullable' annotations context.
+#endif
+
 using System;
 using System.Buffers;
 using System.Buffers.Binary;
@@ -63,18 +73,18 @@ namespace GrpcWebSocketBridge
         public readonly struct BufferReadResult
         {
             public BufferReadResultType Type { get; }
-#if NETSTANDARD2_1 || NET5_0_OR_GREATER
-            public HttpHeaders? HeadersOrTrailers { get; }
-#else
+#if NETSTANDARD2_0
             public HttpHeaders HeadersOrTrailers { get; }
+#else
+            public HttpHeaders? HeadersOrTrailers { get; }
 #endif
             public ReadOnlyMemory<byte> Data { get; }
             public int Consumed { get; }
 
-#if NETSTANDARD2_1 || NET5_0_OR_GREATER
-            public BufferReadResult(BufferReadResultType type, int consumed, HttpHeaders? headersOrTrailers)
-#else
+#if NETSTANDARD2_0
             public BufferReadResult(BufferReadResultType type, int consumed, HttpHeaders headersOrTrailers)
+#else
+            public BufferReadResult(BufferReadResultType type, int consumed, HttpHeaders? headersOrTrailers)
 #endif
             {
                 Type = type;
@@ -174,10 +184,10 @@ namespace GrpcWebSocketBridge
             }
         }
 
-#if NETSTANDARD2_1 || NET5_0_OR_GREATER
-        private bool TryReadHeaders(int headerLength, ReadOnlyMemory<byte> data, out HttpHeaders? headers)
-#else
+#if NETSTANDARD2_0
         private bool TryReadHeaders(int headerLength, ReadOnlyMemory<byte> data, out HttpHeaders headers)
+#else
+        private bool TryReadHeaders(int headerLength, ReadOnlyMemory<byte> data, out HttpHeaders? headers)
 #endif
         {
             var newHeaders = new GrpcWebSocketHttpHeaders();
@@ -245,7 +255,7 @@ namespace GrpcWebSocketBridge
 
         private static string GetString(ReadOnlySpan<byte> span)
         {
-#if NETSTANDARD2_0 || UNITY_2018_4_OR_NEWER
+#if NETSTANDARD2_0
             return Encoding.ASCII.GetString(span.ToArray());
 #else
             return Encoding.ASCII.GetString(span);

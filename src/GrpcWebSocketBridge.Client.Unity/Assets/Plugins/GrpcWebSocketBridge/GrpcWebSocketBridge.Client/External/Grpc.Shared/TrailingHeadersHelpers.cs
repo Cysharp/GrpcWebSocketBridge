@@ -17,6 +17,16 @@
 
 #endregion
 
+// NET_STANDARD is .NET Standard 2.1 on Unity
+#if NET_STANDARD_2_0
+#define NETSTANDARD2_0
+#endif
+#if NET_STANDARD || NET_STANDARD_2_1
+#define NETSTANDARD2_1
+#undef NETSTANDARD2_0 // NOTE: Same symbols defined as in .NET SDK
+#pragma warning disable CS8632 // The annotation for nullable reference types should only be used in code within a '#nullable' annotations context.
+#endif
+
 using System;
 using System.Net.Http;
 using System.Net.Http.Headers;
@@ -27,9 +37,7 @@ namespace Grpc.Shared
     {
         public static HttpHeaders TrailingHeaders(this HttpResponseMessage responseMessage)
         {
-#if !NETSTANDARD2_0 && !UNITY_2018_4_OR_NEWER
-            return responseMessage.TrailingHeaders;
-#else
+#if NETSTANDARD2_0
             if (responseMessage.RequestMessage.Properties.TryGetValue(ResponseTrailersKey, out var headers) &&
                 headers is HttpHeaders httpHeaders)
             {
@@ -40,10 +48,12 @@ namespace Grpc.Shared
             // in RequestMessage.Properties with known key. Return empty collection.
             // Client call will likely fail because it is unable to get a grpc-status.
             return ResponseTrailers.Empty;
+#else
+            return responseMessage.TrailingHeaders;
 #endif
         }
 
-#if NETSTANDARD2_0 || UNITY_2018_4_OR_NEWER
+#if NETSTANDARD2_0
         public static void EnsureTrailingHeaders(this HttpResponseMessage responseMessage)
         {
             if (!responseMessage.RequestMessage.Properties.ContainsKey(ResponseTrailersKey))
