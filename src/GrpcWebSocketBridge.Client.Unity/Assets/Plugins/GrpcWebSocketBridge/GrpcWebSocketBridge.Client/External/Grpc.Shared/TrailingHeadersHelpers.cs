@@ -17,6 +17,15 @@
 
 #endregion
 
+// NET_STANDARD is .NET Standard 2.1 on Unity
+#if NET_STANDARD_2_0
+#define NETSTANDARD2_0
+#endif
+#if NET_STANDARD
+#define NETSTANDARD2_1
+#pragma warning disable CS8632 // The annotation for nullable reference types should only be used in code within a '#nullable' annotations context.
+#endif
+
 using System;
 using System.Net.Http;
 using System.Net.Http.Headers;
@@ -27,7 +36,7 @@ namespace Grpc.Shared
     {
         public static HttpHeaders TrailingHeaders(this HttpResponseMessage responseMessage)
         {
-#if !NETSTANDARD2_0 && !UNITY_2018_4_OR_NEWER
+#if !NETSTANDARD2_0
             return responseMessage.TrailingHeaders;
 #else
             if (responseMessage.RequestMessage.Properties.TryGetValue(ResponseTrailersKey, out var headers) &&
@@ -43,7 +52,7 @@ namespace Grpc.Shared
 #endif
         }
 
-#if NETSTANDARD2_0 || UNITY_2018_4_OR_NEWER
+#if NETSTANDARD2_0
         public static void EnsureTrailingHeaders(this HttpResponseMessage responseMessage)
         {
             if (!responseMessage.RequestMessage.Properties.ContainsKey(ResponseTrailersKey))

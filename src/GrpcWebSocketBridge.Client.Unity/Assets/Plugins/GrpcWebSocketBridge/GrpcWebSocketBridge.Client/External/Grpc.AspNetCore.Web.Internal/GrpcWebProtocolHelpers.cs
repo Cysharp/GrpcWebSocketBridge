@@ -17,6 +17,15 @@
 
 #endregion
 
+// NET_STANDARD is .NET Standard 2.1 on Unity
+#if NET_STANDARD_2_0
+#define NETSTANDARD2_0
+#endif
+#if NET_STANDARD
+#define NETSTANDARD2_1
+#pragma warning disable CS8632 // The annotation for nullable reference types should only be used in code within a '#nullable' annotations context.
+#endif
+
 using System;
 using System.Buffers;
 using System.Buffers.Binary;
@@ -134,7 +143,7 @@ namespace Grpc.AspNetCore.Web.Internal
                         currentBuffer[position++] = Colon;
                         currentBuffer[position++] = Space;
 
-#if NETSTANDARD2_0 || UNITY_2018_4_OR_NEWER
+#if NETSTANDARD2_0
                         var tmpBuffer = ArrayPool<byte>.Shared.Rent(currentBuffer.Slice(position).Length);
                         try
                         {

@@ -16,6 +16,15 @@
 
 #endregion
 
+// NET_STANDARD is .NET Standard 2.1 on Unity
+#if NET_STANDARD_2_0
+#define NETSTANDARD2_0
+#endif
+#if NET_STANDARD
+#define NETSTANDARD2_1
+#pragma warning disable CS8632 // The annotation for nullable reference types should only be used in code within a '#nullable' annotations context.
+#endif
+
 using System;
 using System.Diagnostics;
 using System.IO;
@@ -31,7 +40,7 @@ namespace Grpc.Net.Client.Web.Internal
         /// <summary>
         /// WriteAsync uses the best overload for the platform.
         /// </summary>
-#if NETSTANDARD2_0 || UNITY_2018_4_OR_NEWER
+#if NETSTANDARD2_0
         public static Task WriteAsync(Stream stream, byte[] buffer, int offset, int count, CancellationToken cancellationToken)
         {
             return stream.WriteAsync(buffer, offset, count, cancellationToken);
@@ -46,7 +55,7 @@ namespace Grpc.Net.Client.Web.Internal
         /// <summary>
         /// ReadAsync uses the best overload for the platform. The data must be backed by an array.
         /// </summary>
-#if NETSTANDARD2_0 || UNITY_2018_4_OR_NEWER
+#if NETSTANDARD2_0
         public static Task<int> ReadAsync(Stream stream, Memory<byte> data, CancellationToken cancellationToken = default)
         {
             var success = MemoryMarshal.TryGetArray<byte>(data, out var segment);

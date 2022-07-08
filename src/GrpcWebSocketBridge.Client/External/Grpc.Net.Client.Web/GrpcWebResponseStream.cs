@@ -16,6 +16,15 @@
 
 #endregion
 
+// NET_STANDARD is .NET Standard 2.1 on Unity
+#if NET_STANDARD_2_0
+#define NETSTANDARD2_0
+#endif
+#if NET_STANDARD
+#define NETSTANDARD2_1
+#pragma warning disable CS8632 // The annotation for nullable reference types should only be used in code within a '#nullable' annotations context.
+#endif
+
 using System;
 using System.Buffers.Binary;
 using System.Globalization;
@@ -49,13 +58,13 @@ namespace Grpc.Net.Client.Web.Internal
             _responseTrailers = responseTrailers;
         }
 
-#if NETSTANDARD2_0 || UNITY_2018_4_OR_NEWER
+#if NETSTANDARD2_0
         public override async Task<int> ReadAsync(byte[] buffer, int offset, int count, CancellationToken cancellationToken)
 #else
         public override async ValueTask<int> ReadAsync(Memory<byte> data, CancellationToken cancellationToken = default)
 #endif
         {
-#if NETSTANDARD2_0 || UNITY_2018_4_OR_NEWER
+#if NETSTANDARD2_0
             var data = buffer.AsMemory(offset, count);
 #endif
 
@@ -199,7 +208,7 @@ namespace Grpc.Net.Client.Web.Internal
 
         private static string GetString(ReadOnlySpan<byte> span)
         {
-#if NETSTANDARD2_0 || UNITY_2018_4_OR_NEWER
+#if NETSTANDARD2_0
             return Encoding.ASCII.GetString(span.ToArray());
 #else
             return Encoding.ASCII.GetString(span);

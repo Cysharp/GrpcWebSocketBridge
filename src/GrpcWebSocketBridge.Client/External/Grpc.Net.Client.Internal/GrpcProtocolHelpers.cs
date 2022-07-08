@@ -17,6 +17,15 @@
 
 #endregion
 
+// NET_STANDARD is .NET Standard 2.1 on Unity
+#if NET_STANDARD_2_0
+#define NETSTANDARD2_0
+#endif
+#if NET_STANDARD
+#define NETSTANDARD2_1
+#pragma warning disable CS8632 // The annotation for nullable reference types should only be used in code within a '#nullable' annotations context.
+#endif
+
 using System;
 using System.Diagnostics.CodeAnalysis;
 using System.Linq;
@@ -110,7 +119,7 @@ namespace Grpc.Net.Client.Internal
             }
         }
 
-#if !UNITY_2018_4_OR_NEWER && !NETSTANDARD2_0
+#if !NETSTANDARD2_0
         public static string GetHeaderValue(HttpHeaders? headers, string name)
 #else
         public static string GetHeaderValue(HttpHeaders headers, string name)
@@ -140,7 +149,7 @@ namespace Grpc.Net.Client.Internal
             }
         }
 
-#if !UNITY_2018_4_OR_NEWER && !NETSTANDARD2_0
+#if !NETSTANDARD2_0
         public static bool TryGetStatusCore(HttpHeaders headers, [NotNullWhen(true)] out Status? status)
 #else
         public static bool TryGetStatusCore(HttpHeaders headers, out Status? status)

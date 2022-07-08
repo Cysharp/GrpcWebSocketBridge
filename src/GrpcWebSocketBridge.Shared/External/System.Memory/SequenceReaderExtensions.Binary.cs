@@ -3,6 +3,14 @@
 
 // https://github.com/dotnet/runtime/blob/7d0065f8bc136a18507a086b837591f603a2625d/src/libraries/System.Memory/src/System/Buffers/SequenceReader.cs
 // ReSharper disable CheckNamespace
+// NET_STANDARD is .NET Standard 2.1 on Unity
+#if NET_STANDARD_2_0
+#define NETSTANDARD2_0
+#endif
+#if NET_STANDARD
+#define NETSTANDARD2_1
+#pragma warning disable CS8632 // The annotation for nullable reference types should only be used in code within a '#nullable' annotations context.
+#endif
 #if !(NETSTANDARD2_1 || NET5_0_OR_GREATER)
 
 using System.Buffers.Binary;
