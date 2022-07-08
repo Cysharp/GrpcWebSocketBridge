@@ -21,8 +21,9 @@
 #if NET_STANDARD_2_0
 #define NETSTANDARD2_0
 #endif
-#if NET_STANDARD
+#if NET_STANDARD || NET_STANDARD_2_1
 #define NETSTANDARD2_1
+#undef NETSTANDARD2_0 // NOTE: Same symbols defined as in .NET SDK
 #pragma warning disable CS8632 // The annotation for nullable reference types should only be used in code within a '#nullable' annotations context.
 #endif
 
@@ -39,10 +40,10 @@ namespace Grpc.Net.Client.Internal
 {
     internal static class GrpcProtocolConstants
     {
-#if !NETSTANDARD2_0
-        public static readonly Version Http2Version = System.Net.HttpVersion.Version20;
-#else
+#if NETSTANDARD2_0
         public static readonly Version Http2Version = new Version(2, 0);
+#else
+        public static readonly Version Http2Version = System.Net.HttpVersion.Version20;
 #endif
 
         internal const string GrpcContentType = "application/grpc";

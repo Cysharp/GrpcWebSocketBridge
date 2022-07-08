@@ -2,8 +2,9 @@
 #if NET_STANDARD_2_0
 #define NETSTANDARD2_0
 #endif
-#if NET_STANDARD
+#if NET_STANDARD || NET_STANDARD_2_1
 #define NETSTANDARD2_1
+#undef NETSTANDARD2_0 // NOTE: Same symbols defined as in .NET SDK
 #pragma warning disable CS8632 // The annotation for nullable reference types should only be used in code within a '#nullable' annotations context.
 #endif
 

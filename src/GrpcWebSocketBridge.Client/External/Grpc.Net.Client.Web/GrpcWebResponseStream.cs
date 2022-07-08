@@ -58,13 +58,13 @@ namespace Grpc.Net.Client.Web.Internal
             _responseTrailers = responseTrailers;
         }
 
-#if NETSTANDARD2_0
-        public override async Task<int> ReadAsync(byte[] buffer, int offset, int count, CancellationToken cancellationToken)
-#else
+#if NETSTANDARD2_1
         public override async ValueTask<int> ReadAsync(Memory<byte> data, CancellationToken cancellationToken = default)
+#else
+        public override async Task<int> ReadAsync(byte[] buffer, int offset, int count, CancellationToken cancellationToken)
 #endif
         {
-#if NETSTANDARD2_0
+#if !NETSTANDARD2_1
             var data = buffer.AsMemory(offset, count);
 #endif
 
@@ -208,10 +208,10 @@ namespace Grpc.Net.Client.Web.Internal
 
         private static string GetString(ReadOnlySpan<byte> span)
         {
-#if NETSTANDARD2_0
-            return Encoding.ASCII.GetString(span.ToArray());
-#else
+#if NETSTANDARD2_1
             return Encoding.ASCII.GetString(span);
+#else
+            return Encoding.ASCII.GetString(span.ToArray());
 #endif
         }
 
