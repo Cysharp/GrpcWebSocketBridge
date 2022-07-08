@@ -3,7 +3,7 @@ name: Build (Canary)
 on:
   push:
     branches:
-      - "master"
+      - "main"
     tags:
       - "!*" # not a tag push
     paths-ignore:
