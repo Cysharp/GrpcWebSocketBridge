@@ -163,7 +163,7 @@ jobs:
           path: artifacts
 
       - name: Create archive (Grpc.Net.Client-ModifiedForWebGL.zip)
-        run: zip -r --junk-paths Grpc.Net.Client-ModifiedForWebGL.zip ./Grpc.Net.Client-ModifiedForWebGL/
+        run: zip -r Grpc.Net.Client-ModifiedForWebGL.zip ./Grpc.Net.Client-ModifiedForWebGL/
         working-directory: artifacts
 
       - name: Display downloaded artifact files
