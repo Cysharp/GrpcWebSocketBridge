@@ -46,8 +46,7 @@ jobs:
             6.0.x
       - run: echo "PACKAGE_VERSION=${GIT_TAG}" | tee -a $GITHUB_ENV
       # Build & Pack
-      - run: dotnet pack ./src/GrpcWebSocketBridge.AspNetCore/GrpcWebSocketBridge.AspNetCore.csproj -c Release --include-symbols --include-source -p:VersionPrefix=${PACKAGE_VERSION} -o ./publish/
-      - run: dotnet pack ./src/GrpcWebSocketBridge.Client/GrpcWebSocketBridge.Client.csproj -c Release --include-symbols --include-source -p:VersionPrefix=${PACKAGE_VERSION} -o ./publish/
+      - run: dotnet pack -c Release --include-symbols --include-source -p:VersionPrefix=${PACKAGE_VERSION} -o ./publish/
       - uses: actions/upload-artifact@v1
         with:
           name: nuget

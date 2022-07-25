@@ -7,6 +7,7 @@
     <Nullable>annotations</Nullable>
     <IsTrimmable>true</IsTrimmable>
     <EnableTrimAnalyzer>true</EnableTrimAnalyzer>
+    <IsPackable>true</IsPackable>
   </PropertyGroup>
 
   <ItemGroup>
