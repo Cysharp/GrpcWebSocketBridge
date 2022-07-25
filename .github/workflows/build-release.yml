@@ -17,19 +17,11 @@ env:
 
 jobs:
   update-packagejson:
-    name: "Update package.json"
-    runs-on: ubuntu-latest
-    outputs:
-      sha: ${{ steps.update-package.outputs.sha }}
-    steps:
-      - uses: actions/checkout@v3
-      - uses: ./.github/workflows/composite/update-package
-        id: update-package
-        with:
-          version: ${{ env.GIT_TAG }}
-          target-path: src/GrpcWebSocketBridge.Client.Unity/Assets/Plugins/GrpcWebSocketBridge/package.json
-          github-token: ${{ secrets.GITHUB_TOKEN }}
-          dry-run: ${{ env.DRY_RUN }}
+    uses: Cysharp/Actions/.github/workflows/update-packagejson.yaml@main
+    with:
+      file-path: ./src/GrpcWebSocketBridge.Client.Unity/Assets/Plugins/GrpcWebSocketBridge/package.json
+      tag: ${{ github.event.inputs.tag }}
+      dry-run: ${{ fromJson(github.event.inputs.dry-run) }}
 
   build:
     name: "Build & pack GrpcWebSocketBridge"
@@ -97,15 +89,9 @@ jobs:
           buildMethod: PackageExporter.Export
           versioning: None
 
-      - name: Check all .meta is commited
-        run: |
-          if git ls-files --others --exclude-standard -t | grep --regexp='[.]meta$'; then
-            echo "Detected .meta file generated. Do you forgot commit a .meta file?"
-            exit 1
-          else
-            echo "Great, all .meta files are commited."
-          fi
-        working-directory: src/GrpcWebSocketBridge.Client.Unity
+      - uses: Cysharp/Actions/.github/actions/check-metas@main # check meta files
+        with:
+          directory: src/GrpcWebSocketBridge.Client.Unity
 
       # Store artifacts.
       - uses: actions/upload-artifact@v1
@@ -114,6 +100,7 @@ jobs:
           path: ./src/GrpcWebSocketBridge.Client.Unity/GrpcWebSocketBridge.${{ env.GIT_TAG }}.unitypackage
 
   push:
+    if: ${{ github.event.inputs.dry_run == 'false' }}
     name: "Push NuGet packages"
     needs: [build, build-grpc-dotnet, build-unity]
     runs-on: ubuntu-latest
@@ -128,7 +115,7 @@ jobs:
         run: dotnet nuget push "./artifacts/nuget/*.nupkg" --skip-duplicate -s https://www.nuget.org/api/v2/package -k ${{ secrets.NUGET_KEY }}
 
   create-release:
-    if: github.event.inputs.dry_run == 'false'
+    if: ${{ github.event.inputs.dry_run == 'false' }}
     name: "Create GitHub Release"
     needs: [update-packagejson, build, build-grpc-dotnet, build-unity]
     runs-on: ubuntu-latest
@@ -178,3 +165,10 @@ jobs:
           asset_path: ./artifacts/GrpcWebSocketBridge.${{ env.GIT_TAG }}.unitypackage/GrpcWebSocketBridge.${{ env.GIT_TAG }}.unitypackage
           asset_name: GrpcWebSocketBridge.${{ env.GIT_TAG }}.unitypackage
           asset_content_type: application/octet-stream
+
+  cleanup:
+    if: ${{ needs.update-packagejson.outputs.is-branch-created == 'true' }}
+    needs: [update-packagejson, create-release]
+    uses: Cysharp/Actions/.github/workflows/clean-packagejson-branch.yaml@main
+    with:
+      branch: ${{ needs.update-packagejson.outputs.branch-name }}

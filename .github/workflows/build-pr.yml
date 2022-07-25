@@ -1,6 +1,7 @@
 name: Build (Pull Requests)
 
 on:
+  workflow_dispatch:
   pull_request:
     branches:
       - "main"

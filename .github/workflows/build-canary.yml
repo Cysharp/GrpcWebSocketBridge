@@ -4,8 +4,6 @@ on:
   push:
     branches:
       - "main"
-    tags:
-      - "!*" # not a tag push
     paths-ignore:
       - ".github/**"
       - "docs/**"
