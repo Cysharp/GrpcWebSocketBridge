@@ -6,14 +6,15 @@ on:
       tag:
         description: "tag: git tag you want create. (sample 1.0.0)"
         required: true
-      dry_run:
-        description: "dry_run: true will never create relase/nuget."
+      dry-run:
+        description: "dry-run: true will never create relase/nuget."
         required: true
-        default: "false"
+        default: false
+        type: boolean
 
 env:
   GIT_TAG: ${{ github.event.inputs.tag }}
-  DRY_RUN: ${{ github.event.inputs.dry_run }}
+  DRY_RUN: ${{ github.event.inputs.dry-run }}
 
 jobs:
   update-packagejson:
@@ -100,7 +101,7 @@ jobs:
           path: ./src/GrpcWebSocketBridge.Client.Unity/GrpcWebSocketBridge.${{ env.GIT_TAG }}.unitypackage
 
   push:
-    if: ${{ github.event.inputs.dry_run == 'false' }}
+    if: ${{ github.event.inputs.dry-run == 'false' }}
     name: "Push NuGet packages"
     needs: [build, build-grpc-dotnet, build-unity]
     runs-on: ubuntu-latest
@@ -115,7 +116,7 @@ jobs:
         run: dotnet nuget push "./artifacts/nuget/*.nupkg" --skip-duplicate -s https://www.nuget.org/api/v2/package -k ${{ secrets.NUGET_KEY }}
 
   create-release:
-    if: ${{ github.event.inputs.dry_run == 'false' }}
+    if: ${{ github.event.inputs.dry-run == 'false' }}
     name: "Create GitHub Release"
     needs: [update-packagejson, build, build-grpc-dotnet, build-unity]
     runs-on: ubuntu-latest
