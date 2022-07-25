@@ -10,20 +10,14 @@ on:
       - ".github/**"
       - "docs/**"
       - "**/*.md"
-env:
-  DOTNET_CLI_TELEMETRY_OPTOUT: 1
-  DOTNET_SKIP_FIRST_TIME_EXPERIENCE: 1
-  NUGET_XMLDOC_MODE: skip
-  NUGET_CREDENTIALPROVIDER_SESSIONTOKENCACHE_ENABLED: true
-  DISABLE_NETFX_TARGET_BUILD: 1
-      
+
 jobs:
   canary-build:
     runs-on: ubuntu-latest
     timeout-minutes: 10
     steps:
-      - uses: actions/checkout@v2
-      - uses: actions/setup-dotnet@v1
+      - uses: actions/checkout@v3
+      - uses: Cysharp/Actions/.github/actions/setup-dotnet@main
         with:
           dotnet-version: |
             3.1.x
@@ -48,10 +42,8 @@ jobs:
     runs-on: ubuntu-latest
     timeout-minutes: 10
     steps:
-      - uses: actions/checkout@v2
-      - uses: actions/setup-dotnet@v1
-        with:
-          dotnet-version: 6.0.x
+      - uses: actions/checkout@v3
+      - uses: Cysharp/Actions/.github/actions/setup-dotnet@main
       - run: echo "PACKAGE_VERSION=ci-$(date '+%Y%m%d-%H%M%S')+${GITHUB_SHA:0:6}" >> $GITHUB_ENV
       # Publish
       - run: dotnet publish -f netstandard2.0 -c Release -o ./publish/Grpc.Net.Client/ ./src/External/Grpc.Net.Client
@@ -65,7 +57,7 @@ jobs:
     runs-on: ubuntu-latest
     timeout-minutes: 5
     steps:
-      - uses: actions/setup-dotnet@v1
+      - uses: Cysharp/Actions/.github/actions/setup-dotnet@main
         with:
           dotnet-version: |
             3.1.x
