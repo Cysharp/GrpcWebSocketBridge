@@ -4,7 +4,10 @@ on:
   push:
     branches:
       - "main"
-      - "feature/actions"
+    paths-ignore:
+      - ".github/**"
+      - "docs/**"
+      - "**/*.md"
 
 jobs:
   canary-build:
