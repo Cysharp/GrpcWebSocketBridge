@@ -48,7 +48,6 @@ jobs:
           UNITY_EMAIL: ${{ secrets.UNITY_EMAIL }}
           UNITY_PASSWORD: ${{ secrets.UNITY_PASSWORD }}
           UNITY_SERIAL: ${{ secrets.UNITY_SERIAL }}
-          UNITY_PACKAGE_VERSION: ${{ env.GIT_TAG }}
         with:
           projectPath: src/GrpcWebSocketBridge.Client.Unity
           unityVersion: ${{ matrix.unity }}
