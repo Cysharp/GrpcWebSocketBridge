@@ -61,5 +61,5 @@ jobs:
       # Store artifacts.
       - uses: actions/upload-artifact@v1
         with:
-          name: GrpcWebSocketBridge.${{ env.GIT_TAG }}.unitypackage
-          path: ./src/GrpcWebSocketBridge.Client.Unity/GrpcWebSocketBridge.${{ env.GIT_TAG }}.unitypackage
+          name: GrpcWebSocketBridge.unitypackage
+          path: ./src/GrpcWebSocketBridge.Client.Unity/GrpcWebSocketBridge.unitypackage
