@@ -59,7 +59,9 @@ jobs:
           directory: src/GrpcWebSocketBridge.Client.Unity
 
       # Store artifacts.
+      - name: Get Version
+        run: echo "GIT_TAG=$(cat src/GrpcWebSocketBridge.Client.Unity//Assets/Plugins/GrpcWebSocketBridge/package.json | jq -r '.version')" >> "$GITHUB_ENV"
       - uses: actions/upload-artifact@v1
         with:
-          name: GrpcWebSocketBridge.unitypackage
-          path: ./src/GrpcWebSocketBridge.Client.Unity/GrpcWebSocketBridge.unitypackage
+          name: GrpcWebSocketBridge.${{ env.GIT_TAG }}.unitypackage
+          path: ./src/GrpcWebSocketBridge.Client.Unity/GrpcWebSocketBridge.${{ env.GIT_TAG }}.unitypackage
