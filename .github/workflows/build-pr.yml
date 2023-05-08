@@ -30,3 +30,37 @@ jobs:
       - run: dotnet build ./src/GrpcWebSocketBridge.Client/ -c Release -p:VersionSuffix=${PACKAGE_VERSION}
       # Test
       - run: dotnet test ./tests/GrpcWebSocketBridge.Tests/ -c Debug
+
+  build-unity:
+    if: ${{ ! github.event.pull_request.head.repo.fork }}
+    strategy:
+      matrix:
+        unity: ["2020.3.33f1"]
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    steps:
+      - uses: actions/checkout@v3
+      # execute scripts/Export Package
+      # /opt/Unity/Editor/Unity -quit -batchmode -nographics -silent-crashes -logFile -projectPath . -executeMethod PackageExporter.Export
+      - name: Export unitypackage
+        uses: Cysharp/Actions/.github/actions/unity-builder@main
+        env:
+          UNITY_EMAIL: ${{ secrets.UNITY_EMAIL }}
+          UNITY_PASSWORD: ${{ secrets.UNITY_PASSWORD }}
+          UNITY_SERIAL: ${{ secrets.UNITY_SERIAL }}
+          UNITY_PACKAGE_VERSION: ${{ env.GIT_TAG }}
+        with:
+          projectPath: src/GrpcWebSocketBridge.Client.Unity
+          unityVersion: ${{ matrix.unity }}
+          targetPlatform: StandaloneWindows
+          buildMethod: PackageExporter.Export
+
+      - uses: Cysharp/Actions/.github/actions/check-metas@main # check meta files
+        with:
+          directory: src/GrpcWebSocketBridge.Client.Unity
+
+      # Store artifacts.
+      - uses: actions/upload-artifact@v1
+        with:
+          name: GrpcWebSocketBridge.${{ env.GIT_TAG }}.unitypackage
+          path: ./src/GrpcWebSocketBridge.Client.Unity/GrpcWebSocketBridge.${{ env.GIT_TAG }}.unitypackage
