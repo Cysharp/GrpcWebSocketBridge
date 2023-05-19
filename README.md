@@ -21,13 +21,13 @@ Yet Another gRPC over HTTP/1 using WebSocket implementation, primarily targets .
 ## Requirements
 ### Server
 - gRPC server built on ASP.NET Core
-    - .NET 5 or later
+    - .NET 6 or later
     - Web server listening on HTTP/1
-    - When using MagicOnion, use version 4.5.0 or later
+    - When using with MagicOnion, use MagicOnion 4.5.0 or later
 ### Client
-- .NET 5 or later (Blazor WebAssembly)
-- Unity 2019.4 or later
-  - We recommend a newer version when trying WebGL builds, as older versions, even 2019.4, have behavioural issues (we confirmed this with 2019.4.26f1).
+- .NET 6 or later (Console, Blazor WebAssembly)
+- Unity 2020.3 or later
+  - We strongly recommend a newer version when trying WebGL builds, as older versions, even 2019.4, have behavioural issues (we confirmed this with 2019.4.26f1).
 
 ## How to run a sample project
 
