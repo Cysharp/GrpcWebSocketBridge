@@ -95,7 +95,7 @@ app.MapGet("/", () => "Communication with gRPC endpoints must be made through a 
 app.Run();
 ```
 
-### Client (.NET 5 or later; Blazor WebAssembly)
+### Client (.NET 6 or later; Blazor WebAssembly)
 Add `Grpc.Net.Client` and `GrpcWebSocketBridge.Client` package to your project.
 
 #### Use GrpcWebSocketBridge handler with GrpcChannel
@@ -117,7 +117,7 @@ var channel = GrpcChannel.ForAddress("https://localhost:5000", new GrpcChannelOp
 ### Client (Unity)
 Install the Unity package for GrpcWebSocketBridge, available from the GitHub Release page.
 
-For gRPC-related and dependent libraries, extract and add assemblies for netstandard2.0 or net461 from the following NuGet packages
+For gRPC-related and dependent libraries, extract and add assemblies for netstandard2.1 from the following NuGet packages
 
 - Grpc.Core.Api
 - Grpc.Net.Client (Unity WebGL requires installation of a Cysharp custom-built version)
