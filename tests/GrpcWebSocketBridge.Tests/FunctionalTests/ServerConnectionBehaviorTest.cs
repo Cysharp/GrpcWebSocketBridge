@@ -110,7 +110,7 @@ namespace GrpcWebSocketBridge.Tests.FunctionalTests
             // Disconnect from the server by the client.
             duplex.Dispose();
             channel.Dispose();
-            await Task.Delay(10);
+            await Task.Delay(500);
 
             // Signal to the server to continue processing.
             signal.Set();

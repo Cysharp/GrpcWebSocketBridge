@@ -199,6 +199,7 @@ namespace GrpcWebSocketBridge.Tests.FunctionalTests
         {
             public override async Task SayHelloServerStreaming(HelloRequest request, IServerStreamWriter<HelloReply> responseStream, ServerCallContext context)
             {
+                await Task.Delay(250);
                 context.ResponseTrailers.Add("x-trailer-1", "trailerValue");
                 context.ResponseTrailers.Add("x-trailer-2-bin", new byte[] { 5, 4, 3, 2, 1 });
             }
