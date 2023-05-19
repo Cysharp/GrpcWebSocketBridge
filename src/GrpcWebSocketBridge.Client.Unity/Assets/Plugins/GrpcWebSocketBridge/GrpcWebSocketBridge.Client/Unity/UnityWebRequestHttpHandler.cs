@@ -48,7 +48,7 @@ namespace GrpcWebSocketBridge.Client.Unity
             {
                 RequestMessage = request,
                 Version = HttpVersion.Version11,
-                Content = new ByteArrayContent(unityWebRequest.downloadHandler.data),
+                Content = new ByteArrayContent(unityWebRequest.downloadHandler.data ?? Array.Empty<byte>()),
             };
 
             foreach (var responseHeader in unityWebRequest.GetResponseHeaders())
