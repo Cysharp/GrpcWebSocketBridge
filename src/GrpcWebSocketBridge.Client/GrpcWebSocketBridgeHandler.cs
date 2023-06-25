@@ -181,9 +181,19 @@ namespace GrpcWebSocketBridge.Client
             }
             finally
             {
-                // Send a empty trailer for completion.
-                await clientWebSocket.SendAsync(new ArraySegment<byte>(new byte[] {0b10000000, 0x00, 0x00, 0x00, 0x00}), WebSocketMessageType.Binary, true, cancellationToken).ConfigureAwait(false);
-                await ctx.CompleteRequestAsync().ConfigureAwait(false);
+                try
+                {
+                    // Send a empty trailer for completion.
+                    await clientWebSocket.SendAsync(new ArraySegment<byte>(new byte[] { 0b10000000, 0x00, 0x00, 0x00, 0x00 }), WebSocketMessageType.Binary, true, cancellationToken).ConfigureAwait(false);
+                }
+                catch (WebSocketException e) when (e.WebSocketErrorCode == WebSocketError.InvalidState)
+                {
+                    // ignore errors when trying to send to already closed web socket
+                }
+                finally
+                {
+                    await ctx.CompleteRequestAsync().ConfigureAwait(false);
+                }
             }
         }
 
