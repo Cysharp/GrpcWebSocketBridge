@@ -15,7 +15,7 @@ namespace GrpcWebSocketBridge.Client.Unity
     {
         protected override async Task<HttpResponseMessage> SendAsync(HttpRequestMessage request, CancellationToken cancellationToken)
         {
-            var unityWebRequest = new UnityWebRequest(request.RequestUri, request.Method.Method);
+            using var unityWebRequest = new UnityWebRequest(request.RequestUri, request.Method.Method);
             foreach (var header in request.Headers)
             {
                 try
@@ -41,6 +41,9 @@ namespace GrpcWebSocketBridge.Client.Unity
 
             unityWebRequest.uploadHandler = new UploadHandlerRaw(await request.Content.ReadAsByteArrayAsync().ConfigureAwait(false));
             unityWebRequest.downloadHandler = new DownloadHandlerBuffer();
+
+            unityWebRequest.disposeUploadHandlerOnDispose = true;
+            unityWebRequest.disposeDownloadHandlerOnDispose = true;
 
             await unityWebRequest.SendWebRequest();
 
