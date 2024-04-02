@@ -109,6 +109,7 @@ jobs:
       release-asset-path: |
         ./Grpc.Net.Client-ModifiedForWebGL.${{ inputs.tag }}.zip/Grpc.Net.Client-ModifiedForWebGL.${{ inputs.tag }}.zip
         ./GrpcWebSocketBridge.${{ inputs.tag }}.unitypackage/GrpcWebSocketBridge.${{ inputs.tag }}.unitypackage
+      release-format: '{0}'
     secrets: inherit
 
   cleanup:
