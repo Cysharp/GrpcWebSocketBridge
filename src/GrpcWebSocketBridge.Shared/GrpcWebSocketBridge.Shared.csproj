@@ -11,7 +11,7 @@
   </PropertyGroup>
 
   <ItemGroup>
-    <PackageReference Include="Grpc.Core.Api" Version="2.37.0" />
+    <PackageReference Include="Grpc.Core.Api" Version="2.59.0" />
     <PackageReference Include="System.IO.Pipelines" Version="6.0.2" />
   </ItemGroup>
 
