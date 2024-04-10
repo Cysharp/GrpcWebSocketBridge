@@ -26,8 +26,8 @@ Yet Another gRPC over HTTP/1 using WebSocket implementation, primarily targets .
     - When using with MagicOnion, use MagicOnion 4.5.0 or later
 ### Client
 - .NET 6 or later (Console, Blazor WebAssembly)
-- Unity 2020.3 or later
-  - We strongly recommend a newer version when trying WebGL builds, as older versions, even 2019.4, have behavioural issues (we confirmed this with 2019.4.26f1).
+- Unity 2021.3 or later
+  - We strongly recommend a newer version when trying WebGL builds, as older versions have behavioural issues.
 
 ## How to run a sample project
 
@@ -69,9 +69,10 @@ builder.Services.AddCors(options =>
 });
 ```
 
-**WARNING:** In this example, all are set to accept, but CORS policies should be configured with care to avoid security issues.
+> [!WARNING]
+> In this example, all are set to accept, but CORS policies should be configured with care to avoid security issues.
 
-Add CORS, WebSocket, GrpcWebSocketRequestRoutingEnabler and GrpcWebSocketBridge middleware.
+Add `CORS`, `WebSockets`, `GrpcWebSocketRequestRoutingEnabler` and `GrpcWebSocketBridge` middleware.
 
 ```csharp
 var app = builder.Build();
@@ -99,13 +100,13 @@ app.Run();
 Add `Grpc.Net.Client` and `GrpcWebSocketBridge.Client` package to your project.
 
 #### Use GrpcWebSocketBridge handler with GrpcChannel
-Change the code to use WebSocket instead of HTTP/2 for the gRPC channel.
+You need to change your code to use WebSocket instead of HTTP/2 for gRPC channels.
 
 ```csharp
 var channel = GrpcChannel.ForAddress("https://localhost:5000");
 ```
 
-Change the code to use GrpcWebSocketBridgeHandler as follows.
+Change the code to use GrpcWebSocketBridgeHandler as follows:
 
 ```csharp
 var channel = GrpcChannel.ForAddress("https://localhost:5000", new GrpcChannelOptions()
@@ -130,18 +131,17 @@ For gRPC-related and dependent libraries, extract and add assemblies for netstan
 - System.Runtime.CompilerServices.Unsafe
 - System.Threading.Tasks.Extensions
 
-**NOTE:** If you want to build your application for WebGL, you need to install custom versions of Grpc.Net.Client and Grpc.Net.Common by Cysharp. Those assemblies are available from GitHub Release page.
-
-GrpcWebSocketBridge for Unity also requires [UniTask](https://github.com/Cysharp/UniTask), so the package needs to be installed. See [package installation instructions.](https://github.com/Cysharp/UniTask#upm-package)
+> [!NOTE]
+> If you want to build your application for WebGL, you need to install custom versions of Grpc.Net.Client and Grpc.Net.Common by Cysharp. Those assemblies are available from GitHub Release page.
 
 #### Use GrpcWebSocketBridge handler with GrpcChannel
-Change the code for gRPC channel creation from C-core gRPC to code for using grpc-dotnet and WebSockets.
+You need to change your code to use WebSocket with GrpcWebSocketBridgeHandler instead of HTTP/2 for gRPC channels.
 
 ```csharp
 var channel = new Channel("localhost", 5000);
 ```
 
-Change the code to use GrpcWebSocketBridgeHandler as follows.
+Change the code to use GrpcWebSocketBridgeHandler as follows:
 
 ```csharp
 var channel = GrpcChannel.ForAddress("https://localhost:5000", new GrpcChannelOptions()
@@ -155,7 +155,8 @@ If you want to keep channels in your application code, it is recommended to use 
 #### Disable SynchronizationContext (WebGL)
 If `SynchronisationContext` exists, a code path using ThreadPool will occur and WebGL will stop working because ThreadPool cannot be used. Therefore, `SynchronisationContext` must be set to `null` under WebGL.
 
-**WARNING:** If `null` is set in a non-WebGL environment, the operation will stop because it cannot return to the main thread after `await`, so it should only be applied in a WebGL environment.
+> [!WARNING]
+> If `null` is set in a non-WebGL environment, the operation will stop because it cannot return to the main thread after `await`, so it should only be applied in a WebGL environment.
 
 ```csharp
 #if UNITY_WEBGL && !UNITY_EDITOR
