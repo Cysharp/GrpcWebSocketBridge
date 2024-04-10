@@ -2,9 +2,6 @@ using System;
 using System.Collections.Generic;
 using System.Text;
 using System.Threading.Tasks;
-#if !NON_UNITY
-using Cysharp.Threading.Tasks;
-#endif
 
 // ReSharper disable once CheckNamespace
 namespace GrpcWebSocketBridge.Client
@@ -22,12 +19,5 @@ namespace GrpcWebSocketBridge.Client
                 Console.WriteLine(e);
             }
         }
-
-#if !NON_UNITY
-        public static UniTask ConfigureAwait(this UniTask task, bool _)
-            => task;
-        public static UniTask<T> ConfigureAwait<T>(this UniTask<T> task, bool _)
-            => task;
-#endif
     }
 }

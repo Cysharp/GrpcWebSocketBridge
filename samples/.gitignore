@@ -3,4 +3,6 @@
 *.Unity/Temp/*
 *.Unity/Library/*
 *.Unity/Logs/*
+*.Unity/Build/*
+*.Unity/UserSettings/*
 !*.Unity/Packages/*
