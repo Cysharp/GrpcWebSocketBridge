@@ -12,7 +12,7 @@
   </ItemGroup>
 
   <ItemGroup>
-    <PackageReference Include="MagicOnion.Abstractions" Version="4.5.0" />
+    <PackageReference Include="MagicOnion.Abstractions" />
   </ItemGroup>
 
   <Target Name="RestoreLocalTools" BeforeTargets="GenerateMessagePack;GenerateMagicOnion">
@@ -24,12 +24,6 @@
       <_MessagePackGeneratorArguments>-i ./MagicOnionSampleApp.Shared.csproj -o ../MagicOnionSampleApp.Client.Unity/Assets/Scripts/Generated/MessagePack.Generated.cs</_MessagePackGeneratorArguments>
     </PropertyGroup>
     <Exec Command="dotnet tool run mpc $(_MessagePackGeneratorArguments)" />
-  </Target>
-  <Target Name="GenerateMagicOnion" AfterTargets="Build">
-    <PropertyGroup>
-      <_MagicOnionGeneratorArguments>-i ./MagicOnionSampleApp.Shared.csproj -o ../MagicOnionSampleApp.Client.Unity/Assets/Scripts/Generated/MagicOnion.Generated.cs</_MagicOnionGeneratorArguments>
-    </PropertyGroup>
-    <Exec Command="dotnet tool run dotnet-moc $(_MagicOnionGeneratorArguments)" />
   </Target>
 
 </Project>

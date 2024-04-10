@@ -9,8 +9,8 @@
   </PropertyGroup>
 
   <ItemGroup>
-    <PackageReference Include="Grpc.Net.Client" Version="2.45.0" />
-    <PackageReference Include="MagicOnion.Client" Version="4.5.0" />
+    <PackageReference Include="Grpc.Net.Client" />
+    <PackageReference Include="MagicOnion.Client" />
   </ItemGroup>
 
   <ItemGroup>

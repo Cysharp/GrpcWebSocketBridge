@@ -12,10 +12,16 @@ Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Solution Items", "Solution 
 		.editorconfig = .editorconfig
 		.gitignore = .gitignore
 		Directory.Build.props = Directory.Build.props
+		Directory.Packages.props = Directory.Packages.props
 		README.md = README.md
 	EndProjectSection
 EndProject
 Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "External", "External", "{A0142A94-8868-4F8E-A2A7-90288B6D0768}"
+	ProjectSection(SolutionItems) = preProject
+		src\External\Directory.Build.props = src\External\Directory.Build.props
+		src\External\Directory.Build.targets = src\External\Directory.Build.targets
+		src\External\Directory.Packages.props = src\External\Directory.Packages.props
+	EndProjectSection
 EndProject
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Grpc.Net.Client", "src\External\Grpc.Net.Client\Grpc.Net.Client.csproj", "{D3FC15CA-CE9D-4452-A9FB-15CA7F4F981C}"
 EndProject
