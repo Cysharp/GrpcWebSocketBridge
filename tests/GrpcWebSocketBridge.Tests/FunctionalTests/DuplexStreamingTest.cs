@@ -250,7 +250,7 @@ namespace GrpcWebSocketBridge.Tests.FunctionalTests
 
             host.LastRequest.Items["Server:x-header-1:Value"].Should().Be("value1");
             host.LastRequest.Items["Server:x-header-1:IsBinary"].Should().Be(false);
-            host.LastRequest.Items["Server:x-header-2-bin:ValueBytes"].Should().IsSameOrEqualTo(new byte[] {1, 2, 3, 4});
+            host.LastRequest.Items["Server:x-header-2-bin:ValueBytes"].Should().BeEquivalentTo(new byte[] {1, 2, 3, 4});
             host.LastRequest.Items["Server:x-header-2-bin:IsBinary"].Should().Be(true);
         }
 

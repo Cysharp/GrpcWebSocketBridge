@@ -8,8 +8,8 @@
   </PropertyGroup>
 
   <ItemGroup>
-    <PackageReference Include="Grpc.AspNetCore" Version="2.40.0" />
-    <PackageReference Include="MagicOnion.Server" Version="4.5.0" />
+    <PackageReference Include="Grpc.AspNetCore" />
+    <PackageReference Include="MagicOnion.Server" />
   </ItemGroup>
 
   <ItemGroup>

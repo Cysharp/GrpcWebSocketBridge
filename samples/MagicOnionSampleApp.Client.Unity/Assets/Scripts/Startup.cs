@@ -1,3 +1,4 @@
+using MagicOnion.Client;
 using MessagePack;
 using MessagePack.Resolvers;
 using UnityEngine;
@@ -11,11 +12,12 @@ namespace MagicOnionSampleApp.Client.Unity
         {
             // NOTE: Currently, CompositeResolver doesn't work on Unity IL2CPP build. Use StaticCompositeResolver instead of it.
             StaticCompositeResolver.Instance.Register(
-                MagicOnion.Resolvers.MagicOnionResolver.Instance,
+                MagicOnionGeneratedClientInitializer.Resolver,
                 MessagePack.Resolvers.GeneratedResolver.Instance,
                 BuiltinResolver.Instance,
                 PrimitiveObjectResolver.Instance
             );
+            
 
             MessagePackSerializer.DefaultOptions = MessagePackSerializer.DefaultOptions
                 .WithResolver(StaticCompositeResolver.Instance);
@@ -28,5 +30,10 @@ namespace MagicOnionSampleApp.Client.Unity
             System.Threading.SynchronizationContext.SetSynchronizationContext(null);
         }
 #endif
+    }
+
+    [MagicOnionClientGeneration(typeof(MagicOnionSampleApp.Shared.Hubs.IChatHub))]
+    public partial class MagicOnionGeneratedClientInitializer
+    {
     }
 }
