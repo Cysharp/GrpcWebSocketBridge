@@ -43,6 +43,9 @@ namespace Grpc.Net.Client.Web.Internal
     /// </summary>
     internal class GrpcWebResponseStream : Stream
     {
+        // This uses C# compiler's ability to refer to static data directly. For more information see https://vcsjones.dev/2019/02/01/csharp-readonly-span-bytes-static
+        private static ReadOnlySpan<byte> BytesNewLine => new byte[] { (byte)'\r', (byte)'\n' };
+
         private const int HeaderLength = 5;
 
         private readonly Stream _inner;
@@ -60,13 +63,13 @@ namespace Grpc.Net.Client.Web.Internal
         }
 
 #if NETSTANDARD2_0
-    public override async Task<int> ReadAsync(byte[] buffer, int offset, int count, CancellationToken cancellationToken)
+        public override async Task<int> ReadAsync(byte[] buffer, int offset, int count, CancellationToken cancellationToken)
 #else
         public override async ValueTask<int> ReadAsync(Memory<byte> data, CancellationToken cancellationToken = default)
 #endif
         {
 #if NETSTANDARD2_0
-        var data = buffer.AsMemory(offset, count);
+            var data = buffer.AsMemory(offset, count);
 #endif
             var headerBuffer = Memory<byte>.Empty;
 
@@ -233,7 +236,7 @@ namespace Grpc.Net.Client.Web.Internal
             {
                 ReadOnlySpan<byte> line;
 
-                var lineEndIndex = remainingContent.IndexOf("\r\n"u8);
+                var lineEndIndex = remainingContent.IndexOf(BytesNewLine);
                 if (lineEndIndex == -1)
                 {
                     line = remainingContent;
@@ -264,7 +267,7 @@ namespace Grpc.Net.Client.Web.Internal
         private static string GetString(ReadOnlySpan<byte> span)
         {
 #if NETSTANDARD2_0
-        return Encoding.ASCII.GetString(span.ToArray());
+            return Encoding.ASCII.GetString(span.ToArray());
 #else
             return Encoding.ASCII.GetString(span);
 #endif
