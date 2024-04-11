@@ -17,6 +17,7 @@ namespace GrpcWebSocketBridge.AspNetCore
     public class GrpcWebSocketBridgeMiddleware
     {
         private readonly RequestDelegate _next;
+        private const int ReaderWriterBufferSize = 1024 * 32;
 
         public GrpcWebSocketBridgeMiddleware(RequestDelegate next)
         {
@@ -91,7 +92,7 @@ namespace GrpcWebSocketBridge.AspNetCore
             // Wait until the features are ready to run.
             await readyToRunTask;
 
-            var bufferArray = ArrayPool<byte>.Shared.Rent(minimumLength: 32 * 1024);
+            var bufferArray = new byte[ReaderWriterBufferSize];
             var isRequestCompleted = false;
             var isPipeCompleted = false;
 
@@ -160,8 +161,6 @@ namespace GrpcWebSocketBridge.AspNetCore
                 }
 
                 requestHeaderReceivedTcs.TrySetCanceled();
-
-                ArrayPool<byte>.Shared.Return(bufferArray);
             }
         }
 
@@ -171,21 +170,14 @@ namespace GrpcWebSocketBridge.AspNetCore
             await readyToRunTask;
 
             using var stream = writerPipe.Reader.AsStream();
-            var bufferArray = ArrayPool<byte>.Shared.Rent(minimumLength: 32 * 1024);
-            try
+            var bufferArray = new byte[ReaderWriterBufferSize];
+            var readLen = 0;
+            while ((readLen = await stream.ReadAsync(bufferArray, cancellationToken)) > 0)
             {
-                var readLen = 0;
-                while ((readLen = await stream.ReadAsync(bufferArray, cancellationToken)) > 0)
+                if (webSocket.State == WebSocketState.Open)
                 {
-                    if (webSocket.State == WebSocketState.Open)
-                    {
-                        await webSocket.SendAsync(bufferArray.AsMemory(0, readLen), WebSocketMessageType.Binary, true, cancellationToken);
-                    }
+                    await webSocket.SendAsync(bufferArray.AsMemory(0, readLen), WebSocketMessageType.Binary, true, cancellationToken);
                 }
-            }
-            finally
-            {
-                ArrayPool<byte>.Shared.Return(bufferArray);
             }
         }
     }
