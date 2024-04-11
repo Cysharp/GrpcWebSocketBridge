@@ -120,7 +120,7 @@ namespace MagicOnionSampleApp.Client.Unity
                 builder.Path = "/";
                 var endpoint = builder.ToString();
 #else
-                var endpoint = "http://localhost:7069";
+                var endpoint = "http://localhost:5069";
 #endif
                 var channel = GrpcChannel.ForAddress(endpoint, new GrpcChannelOptions()
                 {

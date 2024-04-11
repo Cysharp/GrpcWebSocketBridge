@@ -22,9 +22,6 @@ using System.Threading;
 using System.Threading.Tasks;
 using Grpc.AspNetCore.Web.Internal;
 using Grpc.Net.Client.Internal;
-#if UNITY_2018_4_OR_NEWER
-using Cysharp.Threading.Tasks;
-#endif
 using Grpc.Shared;
 using GrpcWebSocketBridge.Client.Internal;
 using GrpcWebSocketBridge.Client.WebSockets;
@@ -138,11 +135,7 @@ namespace GrpcWebSocketBridge.Client
         }
 
 
-#if !UNITY_2018_4_OR_NEWER
         private async Task ProcessRequestAsync(IClientWebSocket clientWebSocket, HttpRequestMessage request, ConnectionContext ctx, CancellationToken cancellationToken)
-#else
-        private async UniTask ProcessRequestAsync(IClientWebSocket clientWebSocket, HttpRequestMessage request, ConnectionContext ctx, CancellationToken cancellationToken)
-#endif
         {
             cancellationToken = CancellationTokenSource.CreateLinkedTokenSource(cancellationToken, ctx.ConnectionAborted).Token;
 
@@ -197,11 +190,7 @@ namespace GrpcWebSocketBridge.Client
             }
         }
 
-#if !UNITY_2018_4_OR_NEWER
         private async Task ProcessResponseAsync(IClientWebSocket clientWebSocket, HttpResponseMessage response, ConnectionContext ctx, CancellationToken cancellationToken)
-#else
-        private async UniTask ProcessResponseAsync(IClientWebSocket clientWebSocket, HttpResponseMessage response, ConnectionContext ctx, CancellationToken cancellationToken)
-#endif
         {
             cancellationToken = CancellationTokenSource.CreateLinkedTokenSource(cancellationToken, ctx.ConnectionAborted).Token;
 

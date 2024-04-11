@@ -7,8 +7,8 @@ using System.Text;
 using System.Net.WebSockets;
 using System.Runtime.InteropServices;
 using System.Threading;
+using System.Threading.Tasks;
 using AOT;
-using Cysharp.Threading.Tasks;
 
 namespace GrpcWebSocketBridge.Client.Unity
 {
@@ -19,30 +19,30 @@ namespace GrpcWebSocketBridge.Client.Unity
         public ClientWebSocketOptions Options { get; } = new ClientWebSocketOptions();
         public WebSocketState State { get; private set; } = WebSocketState.None;
 
-        public async UniTask ConnectAsync(Uri url, CancellationToken cancellationToken)
+        public async Task ConnectAsync(Uri url, CancellationToken cancellationToken)
         {
             _ws = new JsWebSocket(url.ToString(), string.Join(",", Options.SubProtocols));
             _ws.Connect();
 
             State = WebSocketState.Connecting;
 
-            var (cancelTask, cancellationTokenRegistration) = cancellationToken.ToUniTask();
+            var cancelTask = new TaskCompletionSource<bool>();
+            var cancellationTokenRegistration = cancellationToken.Register(x => ((TaskCompletionSource<bool>)x).SetResult(true), cancelTask, useSynchronizationContext: false);
             try
             {
-                var win = await UniTask.WhenAny(_ws.Connected, _ws.Closed, cancelTask);
-                if (win == 0)
+                var win = await Task.WhenAny(_ws.Connected, _ws.Closed, cancelTask.Task).ConfigureAwait(false);
+                if (win == _ws.Connected)
                 {
                     // Connection established between the server and the client.
                     State = WebSocketState.Open;
+                    WaitForClosedAsync().Forget();
 
-                    _ws.Closed
-                        .ContinueWith(x =>
-                        {
-                            State = x.WasClean ? WebSocketState.Closed : WebSocketState.Aborted;
-                        })
-                        .Forget();
+                    async Task WaitForClosedAsync()
+                    {
+                        State = (await _ws.Closed.ConfigureAwait(false)).WasClean ? WebSocketState.Closed : WebSocketState.Aborted;
+                    }
                 }
-                else if (win == 2)
+                else if (win == cancelTask.Task)
                 {
                     // Canceled
                     cancellationToken.ThrowIfCancellationRequested();
@@ -62,41 +62,46 @@ namespace GrpcWebSocketBridge.Client.Unity
             }
         }
 
-        public UniTask SendAsync(ReadOnlyMemory<byte> buffer, WebSocketMessageType messageType, bool endOfMessage, CancellationToken cancellationToken)
+        public Task SendAsync(ReadOnlyMemory<byte> buffer, WebSocketMessageType messageType, bool endOfMessage, CancellationToken cancellationToken)
         {
             ThrowIfStateIsNotOpen();
 
             _ws.Send(buffer.ToArray());
-            return default;
+            return Task.CompletedTask;
         }
 
-        public UniTask CloseAsync(WebSocketCloseStatus closeStatus, string statusDescription, CancellationToken cancellationToken)
+        public Task CloseAsync(WebSocketCloseStatus closeStatus, string statusDescription, CancellationToken cancellationToken)
         {
-            if (State == WebSocketState.Closed || State == WebSocketState.CloseSent) return default;
+            if (State == WebSocketState.Closed || State == WebSocketState.CloseSent)
+            {
+                return Task.CompletedTask;
+            }
 
             ThrowIfStateIsNotOpen();
 
             _ws.Close((int)closeStatus, statusDescription);
             State = WebSocketState.CloseSent;
-            return default;
+            return Task.CompletedTask;
         }
 
-        public async UniTask<WebSocketReceiveResult> ReceiveAsync(Memory<byte> buffer, CancellationToken cancellationToken)
+        public async Task<WebSocketReceiveResult> ReceiveAsync(Memory<byte> buffer, CancellationToken cancellationToken)
         {
             ThrowIfStateIsNotOpen();
 
-            var (cancelTask, cancellationTokenRegistration) = cancellationToken.ToUniTask();
+            var cancelTask = new TaskCompletionSource<bool>();
+            var cancellationTokenRegistration = cancellationToken.Register(x => ((TaskCompletionSource<bool>)x).SetResult(true), cancelTask, useSynchronizationContext: false);
+
             try
             {
-                var receiveTask = _ws.ReceiveAsync().Preserve();
-                var (win, result, closed, canceled) = await UniTask.WhenAny(receiveTask, _ws.Closed, cancelTask.AsAsyncUnitUniTask());
-                if (win == 0)
+                var receiveTask = _ws.ReceiveAsync();
+                var win = await Task.WhenAny(receiveTask, _ws.Closed, cancelTask.Task).ConfigureAwait(false);
+                if (win == receiveTask)
                 {
                     // Received
-                    result.CopyTo(buffer);
-                    return new WebSocketReceiveResult(result.Length, WebSocketMessageType.Binary, true);
+                    receiveTask.Result.CopyTo(buffer);
+                    return new WebSocketReceiveResult(receiveTask.Result.Length, WebSocketMessageType.Binary, true);
                 }
-                else if (win == 2)
+                else if (win == cancelTask.Task)
                 {
                     // Canceled
                     cancellationToken.ThrowIfCancellationRequested();
@@ -156,10 +161,10 @@ namespace GrpcWebSocketBridge.Client.Unity
         private static Dictionary<int, JsWebSocket> _instanceByHandle = new Dictionary<int, JsWebSocket>();
         
         private Queue<byte[]> _queue = new Queue<byte[]>();
-        private AutoResetUniTaskCompletionSource<byte[]> _receiveTcs;
+        private TaskCompletionSource<byte[]> _receiveTcs;
         private int _handle;
-        private UniTaskCompletionSource _connected;
-        private UniTaskCompletionSource<(int Code, bool WasClean)> _closed;
+        private TaskCompletionSource<bool> _connected;
+        private TaskCompletionSource<(int Code, bool WasClean)> _closed;
         private bool _disposed;
 
         [DllImport("__Internal")]
@@ -199,7 +204,7 @@ namespace GrpcWebSocketBridge.Client.Unity
 #endif
         private static void OnConnected(int handle)
         {
-            _instanceByHandle[handle]._connected.TrySetResult();
+            _instanceByHandle[handle]._connected.TrySetResult(true);
         }
 
 #if UNITY_STANDALONE || UNITY_WEBGL
@@ -229,8 +234,8 @@ namespace GrpcWebSocketBridge.Client.Unity
 
         public JsWebSocket(string url, string subProtocol)
         {
-            _connected = new UniTaskCompletionSource();
-            _closed = new UniTaskCompletionSource<(int Code, bool WasClean)>();
+            _connected = new TaskCompletionSource<bool>();
+            _closed = new TaskCompletionSource<(int Code, bool WasClean)>();
             _handle = JsWebSocket_Init(url, subProtocol);
             _instanceByHandle[_handle] = this;
 
@@ -239,8 +244,8 @@ namespace GrpcWebSocketBridge.Client.Unity
             JsWebSocket_RegisterOnCloseCallback(_handle, OnClose);
         }
 
-        public UniTask Connected => _connected.Task;
-        public UniTask<(int Code, bool WasClean)> Closed => _closed.Task;
+        public Task Connected => _connected.Task;
+        public Task<(int Code, bool WasClean)> Closed => _closed.Task;
 
         public void Connect()
             => JsWebSocket_Connect(_handle);
@@ -251,17 +256,17 @@ namespace GrpcWebSocketBridge.Client.Unity
         public void Close(int code, string reason)
             => JsWebSocket_Close(_handle, code, reason);
 
-        public UniTask<byte[]> ReceiveAsync()
+        public Task<byte[]> ReceiveAsync()
         {
             if (_receiveTcs != null) throw new InvalidOperationException("There is already an operation in progress.");
 
             if (_queue.Count != 0)
             {
                 _receiveTcs = null;
-                return UniTask.FromResult(_queue.Dequeue());
+                return Task.FromResult(_queue.Dequeue());
             }
 
-            _receiveTcs = AutoResetUniTaskCompletionSource<byte[]>.Create();
+            _receiveTcs = new TaskCompletionSource<byte[]>();
             return _receiveTcs.Task;
         }
 

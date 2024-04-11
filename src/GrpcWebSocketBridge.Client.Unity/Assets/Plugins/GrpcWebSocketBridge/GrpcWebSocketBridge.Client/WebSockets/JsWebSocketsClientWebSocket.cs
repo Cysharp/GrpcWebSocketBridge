@@ -3,8 +3,8 @@ using System.Collections.Generic;
 using System.Net.WebSockets;
 using System.Text;
 using System.Threading;
+using System.Threading.Tasks;
 #if !NON_UNITY
-using Cysharp.Threading.Tasks;
 #if UNITY_WEBGL
 using GrpcWebSocketBridge.Client.Unity;
 #endif
@@ -28,13 +28,13 @@ namespace GrpcWebSocketBridge.Client.WebSockets
         public void AddSubProtocol(string subProtocol)
             => _clientWebSocket.Options.AddSubProtocol(subProtocol);
 
-        public UniTask ConnectAsync(Uri uri, CancellationToken cancellationToken)
+        public Task ConnectAsync(Uri uri, CancellationToken cancellationToken)
             => _clientWebSocket.ConnectAsync(uri, cancellationToken);
 
-        public UniTask SendAsync(ArraySegment<byte> buffer, WebSocketMessageType messageType, bool endOfMessage, CancellationToken cancellationToken)
+        public Task SendAsync(ArraySegment<byte> buffer, WebSocketMessageType messageType, bool endOfMessage, CancellationToken cancellationToken)
             => _clientWebSocket.SendAsync(buffer, messageType, endOfMessage, cancellationToken);
 
-        public UniTask<WebSocketReceiveResult> ReceiveAsync(ArraySegment<byte> buffer, CancellationToken cancellationToken)
+        public Task<WebSocketReceiveResult> ReceiveAsync(ArraySegment<byte> buffer, CancellationToken cancellationToken)
             => _clientWebSocket.ReceiveAsync(buffer, cancellationToken);
 
         public void Dispose()
