@@ -49,12 +49,21 @@ jobs:
     runs-on: ubuntu-latest
     timeout-minutes: 5
     steps:
+      - name: Load secrets
+        id: op-load-secret
+        uses: 1password/load-secrets-action@v2
+        with:
+          export-env: false
+        env:
+          OP_SERVICE_ACCOUNT_TOKEN: ${{ secrets.OP_SERVICE_ACCOUNT_TOKEN_PUBLIC }}
+          VSS_NUGET_EXTERNAL_FEED_ENDPOINTS_PUBLIC_CANARY: "op://GitHubActionsPublic/VSS_NUGET_EXTERNAL_FEED_ENDPOINTS_PUBLIC_CANARY/credential"
+
       - uses: Cysharp/Actions/.github/actions/setup-dotnet@main
       - uses: actions/download-artifact@v2
       # Upload to NuGet
       - run: echo "VSS_NUGET_EXTERNAL_FEED_ENDPOINTS=${FEED_ENDPOINTS}" >> $GITHUB_ENV
         env:
-          FEED_ENDPOINTS: ${{ secrets.VSS_NUGET_EXTERNAL_FEED_ENDPOINTS_PUBLIC_CANARY }}
+          FEED_ENDPOINTS: ${{ steps.op-load-secret.outputs.VSS_NUGET_EXTERNAL_FEED_ENDPOINTS_PUBLIC_CANARY }}
       - run: wget -qO- https://raw.githubusercontent.com/Microsoft/artifacts-credprovider/master/helpers/installcredprovider.sh | bash
       - run: dotnet nuget push "./nuget/*.nupkg" --skip-duplicate -s https://pkgs.dev.azure.com/cysharp/Public/_packaging/Canary-Build/nuget/v2 -k AzureDevOps
 
@@ -65,15 +74,26 @@ jobs:
     runs-on: ubuntu-latest
     timeout-minutes: 15
     steps:
+      - name: Load secrets
+        id: op-load-secret
+        uses: 1password/load-secrets-action@v2
+        with:
+          export-env: false
+        env:
+          OP_SERVICE_ACCOUNT_TOKEN: ${{ secrets.OP_SERVICE_ACCOUNT_TOKEN_PUBLIC }}
+          UNITY_EMAIL: "op://GitHubActionsPublic/UNITY_LICENSE/username"
+          UNITY_PASSWORD: "op://GitHubActionsPublic/UNITY_LICENSE/credential"
+          UNITY_SERIAL: "op://GitHubActionsPublic/UNITY_LICENSE/serial"
+
       - uses: actions/checkout@v3
       # execute scripts/Export Package
       # /opt/Unity/Editor/Unity -quit -batchmode -nographics -silent-crashes -logFile -projectPath . -executeMethod PackageExporter.Export
       - name: Export unitypackage
         uses: Cysharp/Actions/.github/actions/unity-builder@main
         env:
-          UNITY_EMAIL: ${{ secrets.UNITY_EMAIL }}
-          UNITY_PASSWORD: ${{ secrets.UNITY_PASSWORD }}
-          UNITY_SERIAL: ${{ secrets.UNITY_SERIAL }}
+          UNITY_EMAIL: ${{ steps.op-load-secret.outputs.UNITY_EMAIL }}
+          UNITY_PASSWORD: ${{ steps.op-load-secret.outputs.UNITY_PASSWORD }}
+          UNITY_SERIAL: ${{ steps.op-load-secret.outputs.UNITY_SERIAL }}
         with:
           projectPath: src/GrpcWebSocketBridge.Client.Unity
           unityVersion: ${{ matrix.unity }}
