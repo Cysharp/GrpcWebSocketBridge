@@ -26,7 +26,7 @@ jobs:
     needs: [update-packagejson]
     timeout-minutes: 10
     steps:
-      - uses: actions/checkout@v3
+      - uses: actions/checkout@v4
       - uses: Cysharp/Actions/.github/actions/setup-dotnet@main
       # Build & Pack
       - run: dotnet build ./src/GrpcWebSocketBridge.AspNetCore/ -c Release -p:VersionSuffix=${{ inputs.tag }}
@@ -43,7 +43,7 @@ jobs:
     needs: [update-packagejson]
     timeout-minutes: 10
     steps:
-      - uses: actions/checkout@v3
+      - uses: actions/checkout@v4
       - uses: Cysharp/Actions/.github/actions/setup-dotnet@main
       # Build & Publish
       - run: dotnet publish -f netstandard2.0 -c Release -o ./publish/Grpc.Net.Client-ModifiedForWebGL/Grpc.Net.Client/netstandard2.0/ ./src/External/Grpc.Net.Client
@@ -75,7 +75,7 @@ jobs:
           UNITY_PASSWORD: "op://GitHubActionsPublic/UNITY_LICENSE/credential"
           UNITY_SERIAL: "op://GitHubActionsPublic/UNITY_LICENSE/serial"
 
-      - uses: actions/checkout@v3
+      - uses: actions/checkout@v4
         with:
           ref: ${{ needs.update-packagejson.outputs.sha }}
       # execute scripts/Export Package
