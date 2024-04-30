@@ -32,10 +32,11 @@ jobs:
       - run: dotnet build ./src/GrpcWebSocketBridge.AspNetCore/ -c Release -p:VersionSuffix=${{ inputs.tag }}
       - run: dotnet build ./src/GrpcWebSocketBridge.Client/ -c Release -p:VersionSuffix=${{ inputs.tag }}
       - run: dotnet pack -c Release --include-symbols --include-source --no-build -p:VersionPrefix=${{ inputs.tag }} -o ./publish/
-      - uses: actions/upload-artifact@v4
+      - uses: Cysharp/Actions/.github/actions/upload-artifact@main
         with:
           name: nuget
           path: ./publish/
+          retention-days: 1
 
   build-grpc-dotnet:
     name: "Build & publish Grpc.Net.Client for Unity WebGL"
@@ -50,10 +51,11 @@ jobs:
       - run: dotnet publish -f netstandard2.1 -c Release -o ./publish/Grpc.Net.Client-ModifiedForWebGL/Grpc.Net.Client/netstandard2.1/ ./src/External/Grpc.Net.Client
       - run: zip -r ./Grpc.Net.Client-ModifiedForWebGL.${{ inputs.tag }}.zip ./Grpc.Net.Client-ModifiedForWebGL/
         working-directory: ./publish/
-      - uses: actions/upload-artifact@v4
+      - uses: Cysharp/Actions/.github/actions/upload-artifact@main
         with:
           name: Grpc.Net.Client-ModifiedForWebGL.${{ inputs.tag }}.zip
           path: ./publish/Grpc.Net.Client-ModifiedForWebGL.${{ inputs.tag }}.zip
+          retention-days: 1
 
   build-unity:
     name: "Build Unity package"
@@ -98,10 +100,11 @@ jobs:
           directory: src/GrpcWebSocketBridge.Client.Unity
 
       # Store artifacts.
-      - uses: actions/upload-artifact@v4
+      - uses: Cysharp/Actions/.github/actions/upload-artifact@main
         with:
           name: GrpcWebSocketBridge.${{ inputs.tag }}.unitypackage
           path: ./src/GrpcWebSocketBridge.Client.Unity/GrpcWebSocketBridge.${{ inputs.tag }}.unitypackage
+          retention-days: 1
 
   # release
   create-release:

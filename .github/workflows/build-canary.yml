@@ -25,10 +25,11 @@ jobs:
       - run: dotnet test ./tests/GrpcWebSocketBridge.Tests/ -c Debug
       # Pack
       - run: dotnet pack -c Release --include-symbols --include-source --no-build -p:VersionSuffix=${PACKAGE_VERSION} -o ./publish/
-      - uses: actions/upload-artifact@v4
+      - uses: Cysharp/Actions/.github/actions/upload-artifact@main
         with:
           name: nuget
           path: ./publish/
+          retention-days: 1
 
   canary-build-grpc-dotnet:
     runs-on: ubuntu-latest
@@ -39,10 +40,11 @@ jobs:
       - run: echo "PACKAGE_VERSION=ci-$(date '+%Y%m%d-%H%M%S')+${GITHUB_SHA:0:6}" >> $GITHUB_ENV
       # Publish
       - run: dotnet publish -f netstandard2.0 -c Release -o ./publish/Grpc.Net.Client/ ./src/External/Grpc.Net.Client
-      - uses: actions/upload-artifact@v4
+      - uses: Cysharp/Actions/.github/actions/upload-artifact@main
         with:
           name: Grpc.Net.Client-ModifiedForWebGL.zip
           path: ./publish/
+          retention-days: 14
 
   canary-push:
     needs: [canary-build]
@@ -59,7 +61,7 @@ jobs:
           VSS_NUGET_EXTERNAL_FEED_ENDPOINTS_PUBLIC_CANARY: "op://GitHubActionsPublic/VSS_NUGET_EXTERNAL_FEED_ENDPOINTS_PUBLIC_CANARY/credential"
 
       - uses: Cysharp/Actions/.github/actions/setup-dotnet@main
-      - uses: actions/download-artifact@v4
+      - uses: Cysharp/Actions/.github/actions/download-artifact@main
       # Upload to NuGet
       - run: echo "VSS_NUGET_EXTERNAL_FEED_ENDPOINTS=${FEED_ENDPOINTS}" >> $GITHUB_ENV
         env:
@@ -105,7 +107,8 @@ jobs:
       # Store artifacts.
       - name: Get Version
         run: echo "GIT_TAG=$(cat src/GrpcWebSocketBridge.Client.Unity/Assets/Plugins/GrpcWebSocketBridge/package.json | jq -r '.version')" >> "$GITHUB_ENV"
-      - uses: actions/upload-artifact@v4
+      - uses: Cysharp/Actions/.github/actions/upload-artifact@main
         with:
           name: GrpcWebSocketBridge.${{ env.PACKAGE_VERSION }}.unitypackage
           path: ./src/GrpcWebSocketBridge.Client.Unity/GrpcWebSocketBridge.${{ env.GIT_TAG }}.unitypackage
+          retention-days: 14
