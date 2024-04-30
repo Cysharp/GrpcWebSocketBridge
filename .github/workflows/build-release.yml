@@ -36,6 +36,7 @@ jobs:
         with:
           name: nuget
           path: ./publish/
+          retention-days: 1
 
   build-grpc-dotnet:
     name: "Build & publish Grpc.Net.Client for Unity WebGL"
@@ -54,6 +55,7 @@ jobs:
         with:
           name: Grpc.Net.Client-ModifiedForWebGL.${{ inputs.tag }}.zip
           path: ./publish/Grpc.Net.Client-ModifiedForWebGL.${{ inputs.tag }}.zip
+          retention-days: 1
 
   build-unity:
     name: "Build Unity package"
@@ -102,6 +104,7 @@ jobs:
         with:
           name: GrpcWebSocketBridge.${{ inputs.tag }}.unitypackage
           path: ./src/GrpcWebSocketBridge.Client.Unity/GrpcWebSocketBridge.${{ inputs.tag }}.unitypackage
+          retention-days: 1
 
   # release
   create-release:

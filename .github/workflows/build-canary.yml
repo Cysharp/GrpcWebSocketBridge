@@ -29,6 +29,7 @@ jobs:
         with:
           name: nuget
           path: ./publish/
+          retention-days: 1
 
   canary-build-grpc-dotnet:
     runs-on: ubuntu-latest
@@ -43,6 +44,7 @@ jobs:
         with:
           name: Grpc.Net.Client-ModifiedForWebGL.zip
           path: ./publish/
+          retention-days: 14
 
   canary-push:
     needs: [canary-build]
@@ -109,3 +111,4 @@ jobs:
         with:
           name: GrpcWebSocketBridge.${{ env.PACKAGE_VERSION }}.unitypackage
           path: ./src/GrpcWebSocketBridge.Client.Unity/GrpcWebSocketBridge.${{ env.GIT_TAG }}.unitypackage
+          retention-days: 14

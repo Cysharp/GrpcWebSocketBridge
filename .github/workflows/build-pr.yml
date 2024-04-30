@@ -71,3 +71,4 @@ jobs:
         with:
           name: GrpcWebSocketBridge.${{ env.GIT_TAG }}.unitypackage
           path: ./src/GrpcWebSocketBridge.Client.Unity/GrpcWebSocketBridge.${{ env.GIT_TAG }}.unitypackage
+          retention-days: 1
