@@ -8,7 +8,7 @@
     <SystemIOPipelinesVersion>6.0.0</SystemIOPipelinesVersion>
     <SystemMemoryVersion>4.5.5</SystemMemoryVersion>
     <SystemThreadingChannelsVersion>6.0.0</SystemThreadingChannelsVersion>
-    <MagicOnionVersion>6.1.2</MagicOnionVersion>
+    <MagicOnionVersion>7.0.1</MagicOnionVersion>
   </PropertyGroup>
 
   <ItemGroup>

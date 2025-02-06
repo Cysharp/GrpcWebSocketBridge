@@ -7,7 +7,7 @@ namespace MagicOnionSampleApp.Server.Hubs;
 
 public sealed class ChatHub : StreamingHubBase<IChatHub, IChatHubReceiver>, IChatHub
 {
-    private IGroup? _group;
+    private IGroup<IChatHubReceiver>? _group;
     private string _nickName = default!;
 
 
@@ -15,7 +15,7 @@ public sealed class ChatHub : StreamingHubBase<IChatHub, IChatHubReceiver>, ICha
     {
         if (_group is {})
         {
-            Broadcast(_group).OnMemberLeft(_nickName);
+            _group.All.OnMemberLeft(_nickName);
             _group = null;
         }
     }
@@ -27,13 +27,13 @@ public sealed class ChatHub : StreamingHubBase<IChatHub, IChatHubReceiver>, ICha
         _nickName = nickName ?? "Anonymous";
 
         _group = await Group.AddAsync("ChatRoom");
-        Broadcast(_group).OnMemberJoined(nickName);
+        _group.All.OnMemberJoined(nickName);
     }
 
     public async Task LeaveAsync()
     {
         if (_group is null) return;
-        Broadcast(_group).OnMemberLeft(_nickName);
+        _group.All.OnMemberLeft(_nickName);
         await _group.RemoveAsync(this.Context);
         _group = null;
     }
@@ -41,6 +41,6 @@ public sealed class ChatHub : StreamingHubBase<IChatHub, IChatHubReceiver>, ICha
     public async Task SendAsync(string message)
     {
         if (_group is null) return;
-        Broadcast(_group).OnMessageReceived(_nickName, message);
+        _group.All.OnMessageReceived(_nickName, message);
     }
 }
