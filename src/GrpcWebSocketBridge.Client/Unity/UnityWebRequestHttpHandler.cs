@@ -17,7 +17,7 @@ namespace GrpcWebSocketBridge.Client.Unity
         protected override async Task<HttpResponseMessage> SendAsync(HttpRequestMessage requestMessage, CancellationToken cancellationToken)
         {
             using var uploadHandler = new UploadHandlerRaw(await requestMessage.Content.ReadAsByteArrayAsync());
-            uploadHandler.contentType = requestMessage.Headers.Accept.ToString();
+            uploadHandler.contentType = requestMessage.Content.Headers.ContentType.ToString();
 
             using var downloadHandler = new DownloadHandlerBuffer();
             using var webRequest = new UnityWebRequest(requestMessage.RequestUri, requestMessage.Method.ToString(), downloadHandler, uploadHandler);
