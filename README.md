@@ -21,12 +21,12 @@ Yet Another gRPC over HTTP/1 using WebSocket implementation, primarily targets .
 ## Requirements
 ### Server
 - gRPC server built on ASP.NET Core
-    - .NET 6 or later
+    - .NET 8 or later
     - Web server listening on HTTP/1
-    - When using with MagicOnion, use MagicOnion 4.5.0 or later
+    - When using with MagicOnion, use MagicOnion 7.0.0 or later
 ### Client
-- .NET 6 or later (Console, Blazor WebAssembly)
-- Unity 2021.3 or later
+- .NET 8 or later (Console, Blazor WebAssembly)
+- Unity 2022.3 or later
   - We strongly recommend a newer version when trying WebGL builds, as older versions have behavioural issues.
 
 ## How to run a sample project
@@ -46,7 +46,7 @@ NuGet package needs to be installed on the server. Add `GrpcWebSocketBridge.AspN
 dotnet add package GrpcWebSocketBridge.AspNetCore
 ```
 
-#### Enable GrpcWebSocketBridge on the server (.NET 6)
+#### Enable GrpcWebSocketBridge on the server (.NET 8+)
 Enable middleware as a bridge and register a service to use WebSockets.
 
 If the application and API server are different Origins, you need to register the CORS services to use CORS.
@@ -96,7 +96,7 @@ app.MapGet("/", () => "Communication with gRPC endpoints must be made through a 
 app.Run();
 ```
 
-### Client (.NET 6 or later; Blazor WebAssembly)
+### Client (.NET 8 or later; Blazor WebAssembly)
 Add `Grpc.Net.Client` and `GrpcWebSocketBridge.Client` package to your project.
 
 #### Use GrpcWebSocketBridge handler with GrpcChannel
@@ -116,29 +116,28 @@ var channel = GrpcChannel.ForAddress("https://localhost:5000", new GrpcChannelOp
 ```
 
 ### Client (Unity)
-Install the Unity package for GrpcWebSocketBridge, available from the GitHub Release page.
+To install GrpcWebSocketBridge, you need to follow three steps:
 
-For gRPC-related and dependent libraries, extract and add assemblies for netstandard2.1 from the following NuGet packages
+1. Install [NuGetForUnity](https://github.com/GlitchEnzo/NuGetForUnity)
+2. Install Grpc.Net.Client and System.IO.Pipelines from NuGet
+3. Install GrpcWebSocketBridge from Unity Package Manager
 
-- Grpc.Core.Api
-- Grpc.Net.Client (Unity WebGL requires installation of a Cysharp custom-built version)
-- Grpc.Net.Common (Unity WebGL requires installation of a Cysharp custom-built version)
-- Microsoft.Extensions.Logging.Abstractions
-- System.Buffers
-- System.Diagnostics.DiagnosticSource
-- System.IO.Pipelines
-- System.Memory
-- System.Runtime.CompilerServices.Unsafe
-- System.Threading.Tasks.Extensions
+Install GrpcWebSocketBridge using Unity Package Manager with the following URL:
+```
+https://github.com/Cysharp/GrpcWebSocketBridge.git?path=/src/GrpcWebSocketBridge.Client.Unity/Assets/Plugins/GrpcWebSocketBridge#{Version}
+```
 
 > [!NOTE]
-> If you want to build your application for WebGL, you need to install custom versions of Grpc.Net.Client and Grpc.Net.Common by Cysharp. Those assemblies are available from GitHub Release page.
+> {Version} is the version number you want to install (e.g. `1.0.0``).
+
+> [!NOTE]
+> If you want to build your application for WebGL, you need to add `WebGLThreadDispatcher` (see below section) or install custom versions of Grpc.Net.Client and Grpc.Net.Common by Cysharp. Those assemblies are available from GitHub Release page.
 
 #### Use GrpcWebSocketBridge handler with GrpcChannel
 You need to change your code to use WebSocket with GrpcWebSocketBridgeHandler instead of HTTP/2 for gRPC channels.
 
 ```csharp
-var channel = new Channel("localhost", 5000);
+var channel = GrpcChannel.ForAddress("https://localhost:5000");
 ```
 
 Change the code to use GrpcWebSocketBridgeHandler as follows:
@@ -152,7 +151,84 @@ var channel = GrpcChannel.ForAddress("https://localhost:5000", new GrpcChannelOp
 
 If you want to keep channels in your application code, it is recommended to use the `Grpc.Core.ChannelBase` class instead of the `Grpc.Core.Channel` class. It is the base class for all channels.
 
-#### Disable SynchronizationContext (WebGL)
+#### Use `WebGLThreadPoolDispatcher` or Disable SynchronizationContext (WebGL)
+
+On WebGL, Unity Player cannot use ThreadPool, so if there is code in the library that waits for `Task` with `ConfigureAwait(false)`, the continuation (processing after await) may not be executed.
+To avoid this issue, you need to use `WebGLThreadPoolDispatcher` or disable `SynchronizationContext`.
+
+##### Use `WebGLThreadPoolDispatcher`
+
+`WebGLThreadPoolDispatcher` is a workaround that executes ThreadPool processing in the Unity main thread loop (`Update`).
+This is a hacky workaround using reflection, but it is sufficient to avoid cases where the continuation is scheduled on the ThreadPool and stuck due to `ConfigureAwait(false)` in libraries such as grpc-dotnet.
+
+```csharp
+#if UNITY_WEBGL
+using System.Reflection;
+using System;
+using UnityEngine.LowLevel;
+using UnityEngine;
+
+namespace Cysharp.Threading
+{
+    /// <summary>
+    /// Workaround for the issue that Unity Player on WebGL does not support ThreadPool.
+    /// It calls ThreadPool's PerformWaitCallback internal method in the Unity's main thread loop forcibly.
+    /// </summary>
+    /// <remarks>
+    /// Especially when using a library that uses Task's ConfigureAwait(false), the continuation may be scheduled on the ThreadPool and stuck.
+    /// This workaround forcibly executes the ThreadPool to avoid the stuck.
+    /// </remarks>
+    public static class WebGLThreadPoolDispatcher
+    {
+        private static Func<bool> _performWaitCallback;
+
+        public struct Dispatch { }
+
+#if !UNITY_EDITOR
+        // Enable the method to be called when running in a WebGL environment
+        [RuntimeInitializeOnLoadMethod]
+#endif
+        public static void Initialize()
+        {
+            var type_ThreadPoolWaitCallback = Type.GetType("System.Threading._ThreadPoolWaitCallback");
+            var methodPerformWaitCallback = type_ThreadPoolWaitCallback.GetMethod("PerformWaitCallback", BindingFlags.NonPublic | BindingFlags.Static);
+            _performWaitCallback = (Func<bool>)methodPerformWaitCallback.CreateDelegate(typeof(Func<bool>));
+
+            var playerLoopSystemForDispatch = new PlayerLoopSystem()
+            {
+                type = typeof(Dispatch),
+                updateDelegate = PerformWaitCallback,
+            };
+            var playerLoop = PlayerLoop.GetCurrentPlayerLoop();
+            for (var i = 0; i < playerLoop.subSystemList.Length; i++)
+            {
+                if (playerLoop.subSystemList[i].type == typeof(UnityEngine.PlayerLoop.Update))
+                {
+                    var subSystemList = new PlayerLoopSystem[playerLoop.subSystemList[i].subSystemList.Length + 1];
+                    Array.Copy(playerLoop.subSystemList[i].subSystemList, subSystemList, playerLoop.subSystemList[i].subSystemList.Length);
+                    subSystemList[subSystemList.Length - 1] = playerLoopSystemForDispatch;
+                    playerLoop.subSystemList[i].subSystemList = subSystemList;
+                    break;
+                }
+            }
+
+            PlayerLoop.SetPlayerLoop(playerLoop);
+        }
+
+        private static void PerformWaitCallback()
+        {
+            _performWaitCallback();
+        }
+    }
+}
+
+#endif
+```
+
+It is still strongly recommended to use UniTask instead of Task in user code, even if you use this code.
+
+##### Disable SynchronizationContext
+
 If `SynchronisationContext` exists, a code path using ThreadPool will occur and WebGL will stop working because ThreadPool cannot be used. Therefore, `SynchronisationContext` must be set to `null` under WebGL.
 
 > [!WARNING]
