@@ -17,7 +17,7 @@
       "depth": 0,
       "source": "git",
       "dependencies": {},
-      "hash": "61e181fe1e1ecac1b8028b8b81c1bd585258d0e9"
+      "hash": "781c6b0079d6c46b72a1630d7d98283f0c90f44b"
     },
     "com.cysharp.slnmerge": {
       "version": "https://github.com/Cysharp/SlnMerge.git?path=src",
