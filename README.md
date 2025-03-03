@@ -124,7 +124,7 @@ To install GrpcWebSocketBridge, you need to follow three steps:
 
 Install GrpcWebSocketBridge using Unity Package Manager with the following URL:
 ```
-https://github.com/Cysharp/GrpcWebSocketBridge.git?path=/src/GrpcWebSocketBridge.Client.Unity/Assets/Plugins/GrpcWebSocketBridge#{Version}
+https://github.com/Cysharp/GrpcWebSocketBridge.git?path=/src/GrpcWebSocketBridge.Client#{Version}
 ```
 
 > [!NOTE]
