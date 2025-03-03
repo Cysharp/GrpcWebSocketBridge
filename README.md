@@ -151,12 +151,10 @@ var channel = GrpcChannel.ForAddress("https://localhost:5000", new GrpcChannelOp
 
 If you want to keep channels in your application code, it is recommended to use the `Grpc.Core.ChannelBase` class instead of the `Grpc.Core.Channel` class. It is the base class for all channels.
 
-#### Use `WebGLThreadPoolDispatcher` or Disable SynchronizationContext (WebGL)
+#### Add `WebGLThreadPoolDispatcher` (WebGL)
 
 On WebGL, Unity Player cannot use ThreadPool, so if there is code in the library that waits for `Task` with `ConfigureAwait(false)`, the continuation (processing after await) may not be executed.
-To avoid this issue, you need to use `WebGLThreadPoolDispatcher` or disable `SynchronizationContext`.
-
-##### Use `WebGLThreadPoolDispatcher`
+To avoid this issue, you need to use `WebGLThreadPoolDispatcher`.
 
 `WebGLThreadPoolDispatcher` is a workaround that executes ThreadPool processing in the Unity main thread loop (`Update`).
 This is a hacky workaround using reflection, but it is sufficient to avoid cases where the continuation is scheduled on the ThreadPool and stuck due to `ConfigureAwait(false)` in libraries such as grpc-dotnet.
@@ -226,23 +224,6 @@ namespace Cysharp.Threading
 ```
 
 It is still strongly recommended to use UniTask instead of Task in user code, even if you use this code.
-
-##### Disable SynchronizationContext
-
-If `SynchronisationContext` exists, a code path using ThreadPool will occur and WebGL will stop working because ThreadPool cannot be used. Therefore, `SynchronisationContext` must be set to `null` under WebGL.
-
-> [!WARNING]
-> If `null` is set in a non-WebGL environment, the operation will stop because it cannot return to the main thread after `await`, so it should only be applied in a WebGL environment.
-
-```csharp
-#if UNITY_WEBGL && !UNITY_EDITOR
-[RuntimeInitializeOnLoadMethod(RuntimeInitializeLoadType.BeforeSceneLoad)]
-private static void InitializeSynchronizationContext()
-{
-    SynchronizationContext.SetSynchronizationContext(null);
-}
-#endif
-```
 
 ## Troubleshooting
 
