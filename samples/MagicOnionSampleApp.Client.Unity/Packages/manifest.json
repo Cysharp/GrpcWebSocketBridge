@@ -1,6 +1,6 @@
 {
   "dependencies": {
-    "com.cysharp.grpcwebsocketbridge": "file:../../../src/GrpcWebSocketBridge.Client.Unity/Assets/Plugins/GrpcWebSocketBridge",
+    "com.cysharp.grpcwebsocketbridge": "file:../../../src/GrpcWebSocketBridge.Client",
     "com.cysharp.grpcwebsocketbridge.samples.magiconionsampleapp.shared.unity": "file:../../MagicOnionSampleApp.Shared",
     "com.cysharp.magiconion.client.unity": "https://github.com/Cysharp/MagicOnion.git?path=/src/MagicOnion.Client.Unity/Assets/Scripts/MagicOnion.Client.Unity",
     "com.cysharp.slnmerge": "https://github.com/Cysharp/SlnMerge.git?path=src",

@@ -1,6 +1,6 @@
 {
   "dependencies": {
-    "com.cysharp.grpcwebsocketbridge": "file:../../../src/GrpcWebSocketBridge.Client.Unity/Assets/Plugins/GrpcWebSocketBridge",
+    "com.cysharp.grpcwebsocketbridge": "file:../../../src/GrpcWebSocketBridge.Client",
     "com.cysharp.unitask": "https://github.com/Cysharp/UniTask.git?path=src/UniTask/Assets/Plugins/UniTask",
     "com.github-glitchenzo.nugetforunity": "https://github.com/GlitchEnzo/NuGetForUnity.git?path=/src/NuGetForUnity",
     "com.unity.2d.animation": "9.1.3",
