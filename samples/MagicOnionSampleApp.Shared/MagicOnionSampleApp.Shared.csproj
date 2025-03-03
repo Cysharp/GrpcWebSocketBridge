@@ -13,11 +13,4 @@
     <Exec Command="dotnet tool restore" />
   </Target>
 
-  <Target Name="GenerateMessagePack" AfterTargets="Build">
-    <PropertyGroup>
-      <_MessagePackGeneratorArguments>-i ./MagicOnionSampleApp.Shared.csproj -o ../MagicOnionSampleApp.Client.Unity/Assets/Scripts/Generated/MessagePack.Generated.cs</_MessagePackGeneratorArguments>
-    </PropertyGroup>
-    <Exec Command="dotnet tool run mpc $(_MessagePackGeneratorArguments)" />
-  </Target>
-
 </Project>

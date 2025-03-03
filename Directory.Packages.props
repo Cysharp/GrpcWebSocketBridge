@@ -1,41 +1,29 @@
 <Project>
   <PropertyGroup>
     <ManagePackageVersionsCentrally>true</ManagePackageVersionsCentrally>
+    <CentralPackageTransitivePinningEnabled>true</CentralPackageTransitivePinningEnabled>
   </PropertyGroup>
-
-  <PropertyGroup>
-    <GrpcVersion>2.59.0</GrpcVersion>
-    <SystemIOPipelinesVersion>6.0.0</SystemIOPipelinesVersion>
-    <SystemMemoryVersion>4.5.5</SystemMemoryVersion>
-    <SystemThreadingChannelsVersion>6.0.0</SystemThreadingChannelsVersion>
-    <MagicOnionVersion>6.1.2</MagicOnionVersion>
-  </PropertyGroup>
-
   <ItemGroup>
-    <PackageVersion Include="Grpc.AspNetCore" Version="$(GrpcVersion)" />
-    <PackageVersion Include="Grpc.AspNetCore.Server" Version="$(GrpcVersion)" />
-    <PackageVersion Include="Grpc.Core.Api" Version="$(GrpcVersion)" />
-    <PackageVersion Include="Grpc.Net.Client" Version="$(GrpcVersion)" />
-
-    <PackageVersion Include="System.IO.Pipelines" Version="$(SystemIOPipelinesVersion)" />
-    <PackageVersion Include="System.Memory" Version="$(SystemMemoryVersion)" />
-    <PackageVersion Include="System.Threading.Channels" Version="$(SystemThreadingChannelsVersion)" />
-
+    <PackageVersion Include="Grpc.AspNetCore" Version="2.59.0" />
+    <PackageVersion Include="Grpc.AspNetCore.Server" Version="2.59.0" />
+    <PackageVersion Include="Grpc.Core.Api" Version="2.59.0" />
+    <PackageVersion Include="Grpc.Net.Client" Version="2.59.0" />
+    <PackageVersion Include="System.IO.Pipelines" Version="8.0.0" />
+    <PackageVersion Include="System.Memory" Version="4.6.0" />
+    <PackageVersion Include="System.Threading.Channels" Version="8.0.0" />
     <!-- for Unit tests -->
     <PackageVersion Include="FluentAssertions" Version="6.12.0" />
-    <PackageVersion Include="Microsoft.NET.Test.Sdk" Version="17.9.0" />
-    <PackageVersion Include="xunit" Version="2.7.0" />
-    <PackageVersion Include="xunit.runner.visualstudio" Version="2.5.7" />
-    <PackageVersion Include="coverlet.collector" Version="6.0.2" />
-
+    <PackageVersion Include="Microsoft.NET.Test.Sdk" Version="17.13.0" />
+    <PackageVersion Include="xunit" Version="2.9.3" />
+    <PackageVersion Include="xunit.runner.visualstudio" Version="3.0.2" />
+    <PackageVersion Include="coverlet.collector" Version="6.0.4" />
     <!-- for sample projects -->
-    <PackageVersion Include="Google.Protobuf" Version="3.26.1" />
-    <PackageVersion Include="Grpc.Tools" Version="$(GrpcVersion)" />
-    <PackageVersion Include="MagicOnion.Client" Version="$(MagicOnionVersion)" />
-    <PackageVersion Include="MagicOnion.Server" Version="$(MagicOnionVersion)" />
-    <PackageVersion Include="MagicOnion.Abstractions" Version="$(MagicOnionVersion)" />
-    <PackageVersion Include="Microsoft.AspNetCore.Components.WebAssembly" Version="6.0.5" />
-    <PackageVersion Include="Microsoft.AspNetCore.Components.WebAssembly.DevServer" Version="6.0.5" />
+    <PackageVersion Include="Google.Protobuf" Version="3.29.3" />
+    <PackageVersion Include="Grpc.Tools" Version="2.59.0" />
+    <PackageVersion Include="MagicOnion.Client" Version="7.0.2" />
+    <PackageVersion Include="MagicOnion.Server" Version="7.0.2" />
+    <PackageVersion Include="MagicOnion.Abstractions" Version="7.0.2" />
+    <PackageVersion Include="Microsoft.AspNetCore.Components.WebAssembly" Version="8.0.13" />
+    <PackageVersion Include="Microsoft.AspNetCore.Components.WebAssembly.DevServer" Version="8.0.13" />
   </ItemGroup>
-
 </Project>

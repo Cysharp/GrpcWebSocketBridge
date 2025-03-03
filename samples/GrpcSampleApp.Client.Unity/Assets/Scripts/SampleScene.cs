@@ -11,17 +11,6 @@ using UnityEngine.UI;
 
 namespace GrpcSampleApp.Client.Unity
 {
-#if UNITY_WEBGL && !UNITY_EDITOR
-    internal sealed class SynchronizationContextInitializer
-    {
-        [RuntimeInitializeOnLoadMethod(RuntimeInitializeLoadType.BeforeSceneLoad)]
-        private static void InitializeSynchronizationContext()
-        {
-            System.Threading.SynchronizationContext.SetSynchronizationContext(null);
-        }
-    }
-#endif
-
     public class SampleScene : MonoBehaviour
     {
         public Text TextLog;
