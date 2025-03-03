@@ -1,5 +1,11 @@
 {
   "dependencies": {
+    "com.cysharp.grpcwebsocketbridge": {
+      "version": "file:../../GrpcWebSocketBridge.Client",
+      "depth": 0,
+      "source": "local",
+      "dependencies": {}
+    },
     "com.cysharp.unitask": {
       "version": "https://github.com/Cysharp/UniTask.git?path=src/UniTask/Assets/Plugins/UniTask",
       "depth": 0,

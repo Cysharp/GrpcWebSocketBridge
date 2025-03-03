@@ -25,8 +25,6 @@ Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "GitHub Actions", "GitHub Ac
 		.github\workflows\build-release.yml = .github\workflows\build-release.yml
 	EndProjectSection
 EndProject
-Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "GrpcWebSocketBridge.Shared", "src\GrpcWebSocketBridge.Shared\GrpcWebSocketBridge.Shared.csproj", "{BE3B376E-80DA-493C-AF38-E747E60A30B8}"
-EndProject
 Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Samples", "Samples", "{B9487050-7082-4FDE-843F-0BAE34A50C87}"
 EndProject
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "GrpcSampleApp.Server", "samples\GrpcSampleApp.Server\GrpcSampleApp.Server.csproj", "{3DE92F79-5ED8-4EB1-BCCF-5E0B8C4526D1}"
@@ -63,10 +61,6 @@ Global
 		{67336BE5-7F54-41F3-A310-32FA701E0095}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{67336BE5-7F54-41F3-A310-32FA701E0095}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{67336BE5-7F54-41F3-A310-32FA701E0095}.Release|Any CPU.Build.0 = Release|Any CPU
-		{BE3B376E-80DA-493C-AF38-E747E60A30B8}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
-		{BE3B376E-80DA-493C-AF38-E747E60A30B8}.Debug|Any CPU.Build.0 = Debug|Any CPU
-		{BE3B376E-80DA-493C-AF38-E747E60A30B8}.Release|Any CPU.ActiveCfg = Release|Any CPU
-		{BE3B376E-80DA-493C-AF38-E747E60A30B8}.Release|Any CPU.Build.0 = Release|Any CPU
 		{3DE92F79-5ED8-4EB1-BCCF-5E0B8C4526D1}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
 		{3DE92F79-5ED8-4EB1-BCCF-5E0B8C4526D1}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{3DE92F79-5ED8-4EB1-BCCF-5E0B8C4526D1}.Release|Any CPU.ActiveCfg = Release|Any CPU

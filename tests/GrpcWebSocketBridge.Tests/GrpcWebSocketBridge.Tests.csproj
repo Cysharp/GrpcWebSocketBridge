@@ -31,7 +31,6 @@
   <ItemGroup>
     <ProjectReference Include="..\..\src\GrpcWebSocketBridge.AspNetCore\GrpcWebSocketBridge.AspNetCore.csproj" />
     <ProjectReference Include="..\..\src\GrpcWebSocketBridge.Client\GrpcWebSocketBridge.Client.csproj" />
-    <ProjectReference Include="..\..\src\GrpcWebSocketBridge.Shared\GrpcWebSocketBridge.Shared.csproj" />
   </ItemGroup>
 
   <ItemGroup>
