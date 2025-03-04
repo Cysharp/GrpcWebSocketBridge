@@ -15,4 +15,7 @@
     <None Include="..\Icon.png" Pack="true" PackagePath="/" />
   </ItemGroup>
 
+  <ItemGroup>
+    <InternalsVisibleTo Include="GrpcWebSocketBridge.Tests" />
+  </ItemGroup>
 </Project>
