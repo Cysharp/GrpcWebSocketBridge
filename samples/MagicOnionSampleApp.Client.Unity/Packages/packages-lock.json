@@ -1,7 +1,7 @@
 {
   "dependencies": {
     "com.cysharp.grpcwebsocketbridge": {
-      "version": "file:../../../src/GrpcWebSocketBridge.Client.Unity/Assets/Plugins/GrpcWebSocketBridge",
+      "version": "file:../../../src/GrpcWebSocketBridge.Client",
       "depth": 0,
       "source": "local",
       "dependencies": {}

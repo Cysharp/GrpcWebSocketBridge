@@ -11,8 +11,11 @@
   </ItemGroup>
 
   <ItemGroup>
-    <Compile Include="..\GrpcWebSocketBridge.Shared\**\*.cs" Exclude="..\GrpcWebSocketBridge.Shared\**\AssemblyInfo.cs;..\GrpcWebSocketBridge.Shared\**\obj\**;..\GrpcWebSocketBridge.Shared\**\bin\**;" LinkBase="Shared" />
+    <Compile Include="..\GrpcWebSocketBridge.Client\Internal\Shared\**\*.cs" LinkBase="Internal\Shared" />
     <None Include="..\Icon.png" Pack="true" PackagePath="/" />
   </ItemGroup>
 
+  <ItemGroup>
+    <InternalsVisibleTo Include="GrpcWebSocketBridge.Tests" />
+  </ItemGroup>
 </Project>

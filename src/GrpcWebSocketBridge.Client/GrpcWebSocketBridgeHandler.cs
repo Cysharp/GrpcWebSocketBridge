@@ -33,15 +33,7 @@ namespace GrpcWebSocketBridge.Client
         private readonly HashSet<IClientWebSocket> _ongoingWebSockets = new HashSet<IClientWebSocket>();
         private readonly bool _forceWebSocketMode = false;
 
-        public GrpcWebSocketBridgeHandler(bool forceWebSocketMode = false)
-#if UNITY_2018_1_OR_NEWER
-            : base(new GrpcWebSocketBridge.Client.Unity.UnityWebRequestHttpHandler())
-#else
-            : base(new HttpClientHandler())
-#endif
-        {
-            _forceWebSocketMode = forceWebSocketMode;
-        }
+        private static TaskCompletionSource<bool> CreateHeadersTaskCompletionSource() => new TaskCompletionSource<bool>();
 
         private void AddToOngoing(IClientWebSocket webSocket)
         {

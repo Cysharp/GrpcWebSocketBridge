@@ -1,18 +1,14 @@
+#if UNITY_2021_1_OR_NEWER
 using System;
 using System.Collections.Generic;
 using System.Net.WebSockets;
 using System.Text;
 using System.Threading;
 using System.Threading.Tasks;
-#if !NON_UNITY
-#if UNITY_WEBGL
 using GrpcWebSocketBridge.Client.Unity;
-#endif
-#endif
 
 namespace GrpcWebSocketBridge.Client.WebSockets
 {
-
 #if UNITY_WEBGL
     internal class JsWebSocketsClientWebSocket : IClientWebSocket
     {
@@ -42,3 +38,4 @@ namespace GrpcWebSocketBridge.Client.WebSockets
     }
 #endif
 }
+#endif

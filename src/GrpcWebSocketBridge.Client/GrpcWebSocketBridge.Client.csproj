@@ -3,12 +3,14 @@
   <PropertyGroup>
     <TargetFrameworks>netstandard2.0;netstandard2.1;net8.0</TargetFrameworks>
     <LangVersion>9.0</LangVersion>
-    <DefineConstants>TRACE;NON_UNITY</DefineConstants>
     <AllowUnsafeBlocks>true</AllowUnsafeBlocks>
     <Nullable>annotations</Nullable>
+    <IsPackable>true</IsPackable>
+  </PropertyGroup>
+
+  <PropertyGroup Condition="$([MSBuild]::IsTargetFrameworkCompatible('$(TargetFramework)', 'net8.0'))">
     <IsTrimmable>true</IsTrimmable>
     <EnableTrimAnalyzer>true</EnableTrimAnalyzer>
-    <IsPackable>true</IsPackable>
   </PropertyGroup>
 
   <ItemGroup>
@@ -25,21 +27,7 @@
   </ItemGroup>
 
   <ItemGroup>
-    <Compile Include="..\GrpcWebSocketBridge.Shared\**\*.cs" Exclude="..\GrpcWebSocketBridge.Shared\**\AssemblyInfo.cs;..\GrpcWebSocketBridge.Shared\**\obj\**;..\GrpcWebSocketBridge.Shared\**\bin\**;" LinkBase="Shared" />
     <None Include="..\Icon.png" Pack="true" PackagePath="/" />
   </ItemGroup>
 
-  <!-- Synchronize source codes for Unity client -->
-  <PropertyGroup>
-    <_GrpcWebSocketBridgeClientDestination>$(ProjectDir)..\GrpcWebSocketBridge.Client.Unity\Assets\Plugins\GrpcWebSocketBridge\GrpcWebSocketBridge.Client\</_GrpcWebSocketBridgeClientDestination>
-    <_GrpcWebSocketBridgeSharedDestination>$(ProjectDir)..\GrpcWebSocketBridge.Client.Unity\Assets\Plugins\GrpcWebSocketBridge\GrpcWebSocketBridge.Shared\</_GrpcWebSocketBridgeSharedDestination>
-  </PropertyGroup>
-  <ItemGroup>
-    <_GrpcWebSocketBridgeClientFiles Include="$(ProjectDir)**\*.cs;$(ProjectDir)**\*.jslib" Exclude="**\bin\**\*.*;**\obj\**\*.*" />
-    <_GrpcWebSocketBridgeSharedFiles Include="$(ProjectDir)..\GrpcWebSocketBridge.Shared\**\*.cs" Exclude="**\bin\**\*.*;**\obj\**\*.*" />
-  </ItemGroup>
-  <Target Name="PostBuild" AfterTargets="PostBuildEvent">
-    <Copy SourceFiles="@(_GrpcWebSocketBridgeClientFiles)" DestinationFiles="$(_GrpcWebSocketBridgeClientDestination)\%(RecursiveDir)%(Filename)%(Extension)" SkipUnchangedFiles="true" />
-    <Copy SourceFiles="@(_GrpcWebSocketBridgeSharedFiles)" DestinationFiles="$(_GrpcWebSocketBridgeSharedDestination)\%(RecursiveDir)%(Filename)%(Extension)" SkipUnchangedFiles="true" />
-  </Target>
 </Project>
