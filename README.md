@@ -131,7 +131,7 @@ https://github.com/Cysharp/GrpcWebSocketBridge.git?path=/src/GrpcWebSocketBridge
 > {Version} is the version number you want to install (e.g. `1.0.0``).
 
 > [!NOTE]
-> If you want to build your application for WebGL, you need to add `WebGLThreadDispatcher` (see below section) or install custom versions of Grpc.Net.Client and Grpc.Net.Common by Cysharp. Those assemblies are available from GitHub Release page.
+> If you want to build your application for WebGL, you need to add `WebGLThreadDispatcher` (see below section).
 
 #### Use GrpcWebSocketBridge handler with GrpcChannel
 You need to change your code to use WebSocket with GrpcWebSocketBridgeHandler instead of HTTP/2 for gRPC channels.
