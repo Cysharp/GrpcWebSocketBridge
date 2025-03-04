@@ -2,7 +2,7 @@ using System;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
-using FluentAssertions;
+using Shouldly;
 using Grpc.Core;
 using Grpc.Net.Client;
 using GrpcWebSocketBridge.Client;
@@ -30,7 +30,7 @@ namespace GrpcWebSocketBridge.Tests.FunctionalTests
 
             var client = new Greeter.GreeterClient(channel);
             var response = await client.SayHelloAsync(new HelloRequest() {Name = "Alice"}, cancellationToken: TimeoutToken);
-            response.Message.Should().Be("Hello Alice");
+            response.Message.ShouldBe("Hello Alice");
         }
 
         [Fact]
@@ -41,13 +41,14 @@ namespace GrpcWebSocketBridge.Tests.FunctionalTests
 
             var client = new Greeter.GreeterClient(channel);
             var response = await client.SayHelloAsync(new HelloRequest() { Name = "Alice" }, cancellationToken: TimeoutToken);
-            response.Message.Should().Be("Hello Alice");
+            response.Message.ShouldBe("Hello Alice");
 
             await host.LastRequest.Completed;
 
-            host.LastRequest.RequestHeaders.Should().Contain("Upgrade", "websocket");
-            host.LastRequest.Protocol.Should().Be("HTTP/2"); // Fake HTTP/2
-            host.LastRequest.StatusCode.Should().Be(101); // 101 Switch Protocol (upgrade to WebSocket)
+            host.LastRequest.RequestHeaders.ShouldContainKey("Upgrade");
+            host.LastRequest.RequestHeaders["Upgrade"].ToString().ShouldBe("websocket");
+            host.LastRequest.Protocol.ShouldBe("HTTP/2"); // Fake HTTP/2
+            host.LastRequest.StatusCode.ShouldBe(101); // 101 Switch Protocol (upgrade to WebSocket)
         }
 
         class GreeterServiceNoHeadersNoTrailers : Greeter.GreeterBase
@@ -70,14 +71,14 @@ namespace GrpcWebSocketBridge.Tests.FunctionalTests
             headers.Add("x-header-2-bin", new byte[] { 1, 2, 3, 4 });
 
             var response = await client.SayHelloAsync(new HelloRequest() { Name = "Alice" }, new CallOptions(headers, cancellationToken: TimeoutToken));
-            response.Message.Should().Be("Hello Alice");
+            response.Message.ShouldBe("Hello Alice");
 
             await host.LastRequest.Completed;
 
-            host.LastRequest.Items["x-header-1:Exists"].Should().Be(true);
-            host.LastRequest.Items["x-header-2-bin:Exists"].Should().Be(true);
-            host.LastRequest.Items["x-header-2-bin:IsBinary"].Should().Be(true);
-            host.LastRequest.Items["x-header-2-bin:Length"].Should().Be(4);
+            host.LastRequest.Items["x-header-1:Exists"].ShouldBe(true);
+            host.LastRequest.Items["x-header-2-bin:Exists"].ShouldBe(true);
+            host.LastRequest.Items["x-header-2-bin:IsBinary"].ShouldBe(true);
+            host.LastRequest.Items["x-header-2-bin:Length"].ShouldBe(4);
         }
 
         class GreeterServiceClientHeadersNoTrailers : Greeter.GreeterBase
@@ -105,12 +106,12 @@ namespace GrpcWebSocketBridge.Tests.FunctionalTests
             var request = client.SayHelloAsync(new HelloRequest() { Name = "Alice" }, cancellationToken: TimeoutToken);
             var responseHeaders = await request.ResponseHeadersAsync.WithCancellation(TimeoutToken);
 
-            responseHeaders.Should().Contain(x => x.Key == "x-header-1");
-            responseHeaders.Should().Contain(x => x.Key == "x-header-2-bin" && x.IsBinary);
-            responseHeaders.GetValueBytes("x-header-2-bin").Should().Equal(new byte[] { 1, 2, 3, 4 });
+            responseHeaders.ShouldContain(x => x.Key == "x-header-1");
+            responseHeaders.ShouldContain(x => x.Key == "x-header-2-bin" && x.IsBinary);
+            responseHeaders.GetValueBytes("x-header-2-bin").ShouldBe(new byte[] { 1, 2, 3, 4 });
 
             var response = await request;
-            response.Message.Should().Be("Hello Alice");
+            response.Message.ShouldBe("Hello Alice");
         }
 
         class GreeterServiceResponseHeaders : Greeter.GreeterBase
@@ -139,11 +140,11 @@ namespace GrpcWebSocketBridge.Tests.FunctionalTests
             var response = await request;
 
             var responseTrailers = request.GetTrailers();
-            responseTrailers.Should().Contain(x => x.Key == "x-header-1");
-            responseTrailers.Should().Contain(x => x.Key == "x-header-2-bin" && x.IsBinary);
-            responseTrailers.GetValueBytes("x-header-2-bin").Should().Equal(new byte[] { 1, 2, 3, 4 });
+            responseTrailers.ShouldContain(x => x.Key == "x-header-1");
+            responseTrailers.ShouldContain(x => x.Key == "x-header-2-bin" && x.IsBinary);
+            responseTrailers.GetValueBytes("x-header-2-bin").ShouldBe(new byte[] { 1, 2, 3, 4 });
 
-            response.Message.Should().Be("Hello Alice");
+            response.Message.ShouldBe("Hello Alice");
         }
 
         class GreeterServiceResponseTrailers : Greeter.GreeterBase
@@ -164,9 +165,11 @@ namespace GrpcWebSocketBridge.Tests.FunctionalTests
             using var channel = host.CreateChannel();
 
             var client = new Greeter.GreeterClient(channel);
-            var ex = await Assert.ThrowsAsync<RpcException>(async () => await client.SayHelloAsync(new HelloRequest() { Name = "Alice" }, cancellationToken: TimeoutToken));
-            ex.Status.StatusCode.Should().Be(StatusCode.Unknown);
-            ex.Status.Detail.Should().Be("Exception was thrown by handler.");
+            var ex = await Should.ThrowAsync<RpcException>(async () => 
+                await client.SayHelloAsync(new HelloRequest() { Name = "Alice" }, cancellationToken: TimeoutToken)
+            );
+            ex.Status.StatusCode.ShouldBe(StatusCode.Unknown);
+            ex.Status.Detail.ShouldBe("Exception was thrown by handler.");
         }
 
         class GreeterServiceThrowException : Greeter.GreeterBase
@@ -184,9 +187,11 @@ namespace GrpcWebSocketBridge.Tests.FunctionalTests
             using var channel = host.CreateChannel();
 
             var client = new Greeter.GreeterClient(channel);
-            var ex = await Assert.ThrowsAsync<RpcException>(async () => await client.SayHelloAsync(new HelloRequest() { Name = "Alice" }, cancellationToken: TimeoutToken));
-            ex.Status.StatusCode.Should().Be(StatusCode.AlreadyExists);
-            ex.Status.Detail.Should().Be("Something went wrong.");
+            var ex = await Should.ThrowAsync<RpcException>(async () => 
+                await client.SayHelloAsync(new HelloRequest() { Name = "Alice" }, cancellationToken: TimeoutToken)
+            );
+            ex.Status.StatusCode.ShouldBe(StatusCode.AlreadyExists);
+            ex.Status.Detail.ShouldBe("Something went wrong.");
         }
 
         class GreeterServiceReturnStatusCode : Greeter.GreeterBase
@@ -206,7 +211,7 @@ namespace GrpcWebSocketBridge.Tests.FunctionalTests
             var client = new Greeter.GreeterClient(channel);
             var request = client.SayHelloAsync(new HelloRequest() { Name = "Alice" }, cancellationToken: TimeoutToken);
             await Task.WhenAny(request.ResponseHeadersAsync, Task.Delay(100));
-            request.ResponseHeadersAsync.IsCompleted.Should().BeFalse();
+            request.ResponseHeadersAsync.IsCompleted.ShouldBeFalse();
         }
 
         class GreeterServiceResponseHeaderNever : Greeter.GreeterBase
@@ -233,7 +238,7 @@ namespace GrpcWebSocketBridge.Tests.FunctionalTests
                 sb.Append(i);
             }
 
-            response.Message.Should().Be("Alice"  + sb.ToString());
+            response.Message.ShouldBe("Alice"  + sb.ToString());
         }
 
         class GreeterServiceLargePayloadResponse : Greeter.GreeterBase
@@ -265,7 +270,7 @@ namespace GrpcWebSocketBridge.Tests.FunctionalTests
             var client = new Greeter.GreeterClient(channel);
             var response = await client.SayHelloAsync(new HelloRequest() { Name = sb.ToString() }, cancellationToken: TimeoutToken);
 
-            response.Message.Should().Be(sb.ToString().Length.ToString());
+            response.Message.ShouldBe(sb.ToString().Length.ToString());
         }
 
         class GreeterServiceLargePayloadRequest : Greeter.GreeterBase

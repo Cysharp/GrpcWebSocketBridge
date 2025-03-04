@@ -5,7 +5,7 @@ using System.Linq;
 using System.Text;
 using System.Threading;
 using System.Threading.Tasks;
-using FluentAssertions;
+using Shouldly;
 using Grpc.Core;
 using Grpc.Net.Client;
 using GrpcWebSocketBridge.Client;
@@ -33,7 +33,9 @@ namespace GrpcWebSocketBridge.Tests.FunctionalTests
 
             using var channel = host.CreateChannel();
             var client = new Greeter.GreeterClient(channel);
-            await Assert.ThrowsAsync<RpcException>(async () => await client.SayHelloAsync(new HelloRequest(), cancellationToken: TimeoutToken));
+            await Should.ThrowAsync<RpcException>(async () => 
+                await client.SayHelloAsync(new HelloRequest(), cancellationToken: TimeoutToken)
+            );
         }
 
         [Fact]
@@ -47,7 +49,7 @@ namespace GrpcWebSocketBridge.Tests.FunctionalTests
             var client = new Greeter.GreeterClient(channel);
             var duplex = client.SayHelloDuplex();
 
-            await Assert.ThrowsAsync<RpcException>(async () => await duplex.ResponseHeadersAsync);
+            await Should.ThrowAsync<RpcException>(async () => await duplex.ResponseHeadersAsync);
         }
 
         [Fact]
@@ -61,7 +63,7 @@ namespace GrpcWebSocketBridge.Tests.FunctionalTests
             var client = new Greeter.GreeterClient(channel);
             var duplex = client.SayHelloDuplex();
 
-            await Assert.ThrowsAsync<RpcException>(async () => await duplex.ResponseStream.MoveNext(TimeoutToken));
+            await Should.ThrowAsync<RpcException>(async () => await duplex.ResponseStream.MoveNext(TimeoutToken));
         }
 
         [Fact]
@@ -75,7 +77,7 @@ namespace GrpcWebSocketBridge.Tests.FunctionalTests
             var client = new Greeter.GreeterClient(channel);
             var duplex = client.SayHelloDuplex();
 
-            await Assert.ThrowsAsync<RpcException>(async () => await duplex.RequestStream.WriteAsync(new HelloRequest()));
+            await Should.ThrowAsync<RpcException>(async () => await duplex.RequestStream.WriteAsync(new HelloRequest()));
         }
 
 
@@ -94,12 +96,12 @@ namespace GrpcWebSocketBridge.Tests.FunctionalTests
         //    var duplex = client.SayHelloDuplex();
 
         //    var headerTask = duplex.ResponseHeadersAsync;
-        //    headerTask.IsCompleted.Should().BeFalse();
+        //    headerTask.IsCompleted.ShouldBeFalse();
 
         //    // Shutdown the server.
         //    await host.DisposeAsync();
 
-        //    await Assert.ThrowsAsync<RpcException>(async () => await headerTask);
+        //    await Should.ThrowAsync<RpcException>(async () => await headerTask);
         //}
 
         //class GreeterServiceDisconnectFromServerDuplexWaitForHeader : Greeter.GreeterBase
@@ -123,7 +125,7 @@ namespace GrpcWebSocketBridge.Tests.FunctionalTests
             // Shutdown the server immediately.
             await host.DisposeAsync();
 
-            await Assert.ThrowsAsync<RpcException>(async () => await duplex.ResponseStream.MoveNext(TimeoutToken));
+            await Should.ThrowAsync<RpcException>(async () => await duplex.ResponseStream.MoveNext(TimeoutToken));
         }
 
         [Fact]
@@ -141,7 +143,7 @@ namespace GrpcWebSocketBridge.Tests.FunctionalTests
             // Shutdown the server immediately.
             await host.DisposeAsync();
 
-            await Assert.ThrowsAsync<RpcException>(async () => await moveNextTask);
+            await Should.ThrowAsync<RpcException>(async () => await moveNextTask);
         }
 
         [Fact]
@@ -157,8 +159,8 @@ namespace GrpcWebSocketBridge.Tests.FunctionalTests
             // Shutdown the server immediately.
             await host.DisposeAsync();
 
-            var ex = await Assert.ThrowsAsync<IOException>(async () => await duplex.RequestStream.WriteAsync(new HelloRequest()));
-            ex.Message.Should().Be("The request was aborted.");
+            var ex = await Should.ThrowAsync<IOException>(async () => await duplex.RequestStream.WriteAsync(new HelloRequest()));
+            ex.Message.ShouldBe("The request was aborted.");
         }
 
         [Fact]
@@ -174,7 +176,8 @@ namespace GrpcWebSocketBridge.Tests.FunctionalTests
             // Shutdown the server immediately.
             await host.DisposeAsync();
 
-            Assert.Throws<InvalidOperationException>(() => duplex.GetStatus()).Message.Should().Be("Unable to get the status because the call is not complete.");
+            Should.Throw<InvalidOperationException>(() => duplex.GetStatus())
+                .Message.ShouldBe("Unable to get the status because the call is not complete.");
         }
 
         [Fact]
@@ -190,7 +193,8 @@ namespace GrpcWebSocketBridge.Tests.FunctionalTests
             // Shutdown the server immediately.
             await host.DisposeAsync();
 
-            Assert.Throws<InvalidOperationException>(() => duplex.GetTrailers()).Message.Should().Be("Can't get the call trailers because the call has not completed successfully.");
+            Should.Throw<InvalidOperationException>(() => duplex.GetTrailers())
+                .Message.ShouldBe("Can't get the call trailers because the call has not completed successfully.");
         }
 
         class GreeterServiceDisconnectFromServerDuplexWaitForResponses : Greeter.GreeterBase
@@ -210,16 +214,16 @@ namespace GrpcWebSocketBridge.Tests.FunctionalTests
             var client = new Greeter.GreeterClient(channel);
             var duplex = client.SayHelloDuplex();
 
-            (await duplex.ResponseHeadersAsync).Should().NotBeNull();
+            (await duplex.ResponseHeadersAsync).ShouldNotBeNull();
 
             await duplex.RequestStream.WriteAsync(new HelloRequest());
             await duplex.ResponseStream.MoveNext(TimeoutToken);
-            duplex.ResponseStream.Current.Message.Should().Be("#1");
+            duplex.ResponseStream.Current.Message.ShouldBe("#1");
 
             // Shutdown the server immediately.
             await host.DisposeAsync();
 
-            await Assert.ThrowsAsync<RpcException>(async () => await duplex.ResponseStream.MoveNext(TimeoutToken));
+            await Should.ThrowAsync<RpcException>(async () => await duplex.ResponseStream.MoveNext(TimeoutToken));
         }
 
         [Fact]
@@ -230,18 +234,18 @@ namespace GrpcWebSocketBridge.Tests.FunctionalTests
             var client = new Greeter.GreeterClient(channel);
             var duplex = client.SayHelloDuplex();
 
-            (await duplex.ResponseHeadersAsync).Should().NotBeNull();
+            (await duplex.ResponseHeadersAsync).ShouldNotBeNull();
 
             await duplex.RequestStream.WriteAsync(new HelloRequest());
             await duplex.ResponseStream.MoveNext(TimeoutToken);
-            duplex.ResponseStream.Current.Message.Should().Be("#1");
+            duplex.ResponseStream.Current.Message.ShouldBe("#1");
 
             var moveTask = duplex.ResponseStream.MoveNext(TimeoutToken);
 
             // Shutdown the server immediately.
             await host.DisposeAsync();
 
-            await Assert.ThrowsAsync<RpcException>(async () => await moveTask);
+            await Should.ThrowAsync<RpcException>(async () => await moveTask);
         }
 
         [Fact]
@@ -252,17 +256,17 @@ namespace GrpcWebSocketBridge.Tests.FunctionalTests
             var client = new Greeter.GreeterClient(channel);
             var duplex = client.SayHelloDuplex();
 
-            (await duplex.ResponseHeadersAsync).Should().NotBeNull();
+            (await duplex.ResponseHeadersAsync).ShouldNotBeNull();
 
             await duplex.RequestStream.WriteAsync(new HelloRequest());
             await duplex.ResponseStream.MoveNext(TimeoutToken);
-            duplex.ResponseStream.Current.Message.Should().Be("#1");
+            duplex.ResponseStream.Current.Message.ShouldBe("#1");
 
             // Shutdown the server immediately.
             await host.DisposeAsync();
 
-            var ex = await Assert.ThrowsAsync<IOException>(async () => await duplex.RequestStream.WriteAsync(new HelloRequest()));
-            ex.Message.Should().Be("The request was aborted.");
+            var ex = await Should.ThrowAsync<IOException>(async () => await duplex.RequestStream.WriteAsync(new HelloRequest()));
+            ex.Message.ShouldBe("The request was aborted.");
         }
 
         [Fact]
@@ -273,16 +277,17 @@ namespace GrpcWebSocketBridge.Tests.FunctionalTests
             var client = new Greeter.GreeterClient(channel);
             var duplex = client.SayHelloDuplex();
 
-            (await duplex.ResponseHeadersAsync).Should().NotBeNull();
+            (await duplex.ResponseHeadersAsync).ShouldNotBeNull();
 
             await duplex.RequestStream.WriteAsync(new HelloRequest());
             await duplex.ResponseStream.MoveNext(TimeoutToken);
-            duplex.ResponseStream.Current.Message.Should().Be("#1");
+            duplex.ResponseStream.Current.Message.ShouldBe("#1");
 
             // Shutdown the server immediately.
             await host.DisposeAsync();
 
-            Assert.Throws<InvalidOperationException>(() => duplex.GetStatus()).Message.Should().Be("Unable to get the status because the call is not complete.");
+            Should.Throw<InvalidOperationException>(() => duplex.GetStatus())
+                .Message.ShouldBe("Unable to get the status because the call is not complete.");
         }
 
         [Fact]
@@ -293,16 +298,17 @@ namespace GrpcWebSocketBridge.Tests.FunctionalTests
             var client = new Greeter.GreeterClient(channel);
             var duplex = client.SayHelloDuplex();
 
-            (await duplex.ResponseHeadersAsync).Should().NotBeNull();
+            (await duplex.ResponseHeadersAsync).ShouldNotBeNull();
 
             await duplex.RequestStream.WriteAsync(new HelloRequest());
             await duplex.ResponseStream.MoveNext(TimeoutToken);
-            duplex.ResponseStream.Current.Message.Should().Be("#1");
+            duplex.ResponseStream.Current.Message.ShouldBe("#1");
 
             // Shutdown the server immediately.
             await host.DisposeAsync();
 
-            Assert.Throws<InvalidOperationException>(() => duplex.GetTrailers()).Message.Should().Be("Can't get the call trailers because the call has not completed successfully.");
+            Should.Throw<InvalidOperationException>(() => duplex.GetTrailers())
+                .Message.ShouldBe("Can't get the call trailers because the call has not completed successfully.");
         }
 
         class GreeterServiceDisconnectFromServerDuplexDuringSendResponses : Greeter.GreeterBase
