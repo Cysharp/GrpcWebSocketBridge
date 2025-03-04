@@ -3,14 +3,13 @@ using System.Linq;
 using System.Text;
 using System.Threading;
 using System.Threading.Tasks;
-using FluentAssertions;
-using FluentAssertions.Common;
 using Grpc.Core;
 using Grpc.Net.Client;
 using GrpcWebSocketBridge.Client;
 using GrpcWebSocketBridge.Tests.Helpers;
 using GrpcWebSocketBridge.Tests.Protos;
 using Microsoft.Extensions.Logging;
+using Shouldly;
 using Xunit;
 using Xunit.Abstractions;
 
@@ -35,7 +34,7 @@ namespace GrpcWebSocketBridge.Tests.FunctionalTests
 
             var responses = await serverStreaming.ResponseStream.ReadAllAsync(TimeoutToken).ToArrayAsync(TimeoutToken);
 
-            responses.Should().BeEmpty();
+            responses.ShouldBeEmpty();
         }
 
         [Fact]
@@ -49,12 +48,13 @@ namespace GrpcWebSocketBridge.Tests.FunctionalTests
 
             var responses = await serverStreaming.ResponseStream.ReadAllAsync(TimeoutToken).ToArrayAsync(TimeoutToken);
 
-            responses.Should().BeEmpty();
+            responses.ShouldBeEmpty();
 
             await host.LastRequest.Completed;
-            host.LastRequest.RequestHeaders.Should().Contain("Upgrade", "websocket");
-            host.LastRequest.Protocol.Should().Be("HTTP/2"); // Fake HTTP/2
-            host.LastRequest.StatusCode.Should().Be(101); // 101 Switch Protocol (upgrade to WebSocket)
+            host.LastRequest.RequestHeaders.ShouldContainKey("Upgrade");
+            host.LastRequest.RequestHeaders["Upgrade"].ToString().ShouldBe("websocket");
+            host.LastRequest.Protocol.ShouldBe("HTTP/2"); // Fake HTTP/2
+            host.LastRequest.StatusCode.ShouldBe(101); // 101 Switch Protocol (upgrade to WebSocket)
         }
 
         class GreeterServiceNoHeadersNoTrailersNoResponses : Greeter.GreeterBase
@@ -75,18 +75,18 @@ namespace GrpcWebSocketBridge.Tests.FunctionalTests
             var serverStreaming = client.SayHelloServerStreaming(new HelloRequest { Name = "Req#1" });
 
             await Task.WhenAny(serverStreaming.ResponseHeadersAsync, Task.Delay(100) /* wait for 100ms */);
-            serverStreaming.ResponseHeadersAsync.IsCompleted.Should().BeTrue();
+            serverStreaming.ResponseHeadersAsync.IsCompleted.ShouldBeTrue();
 
             // Read from the response stream.
             var response = await serverStreaming.ResponseStream.ReadAllAsync(TimeoutToken).FirstAsync(TimeoutToken);
-            response.Message.Should().Be("#1");
-            serverStreaming.ResponseHeadersAsync.IsCompleted.Should().BeTrue();
+            response.Message.ShouldBe("#1");
+            serverStreaming.ResponseHeadersAsync.IsCompleted.ShouldBeTrue();
 
             // The response stream has ended.
-            (await serverStreaming.ResponseStream.MoveNext(TimeoutToken)).Should().BeFalse();
+            (await serverStreaming.ResponseStream.MoveNext(TimeoutToken)).ShouldBeFalse();
 
             await host.LastRequest.Completed;
-            host.LastRequest.Items["RequestStream:First.Name"].Should().Be("Req#1");
+            host.LastRequest.Items["RequestStream:First.Name"].ShouldBe("Req#1");
         }
 
         class GreeterServiceNoHeadersNoTrailersResponseAfterRequest : Greeter.GreeterBase
@@ -111,16 +111,16 @@ namespace GrpcWebSocketBridge.Tests.FunctionalTests
 
             // 1. The server pushes the response headers.
             var responseHeaders = await serverStreaming.ResponseHeadersAsync.WithCancellation(TimeoutToken);
-            responseHeaders.Should().Contain(x => x.Key == "x-header-1");
-            responseHeaders.Should().Contain(x => x.Key == "x-header-2-bin" && x.IsBinary);
-            responseHeaders.GetValueBytes("x-header-2-bin").Should().Equal(new byte[] { 1, 2, 3, 4 });
+            responseHeaders.ShouldContain(x => x.Key == "x-header-1");
+            responseHeaders.ShouldContain(x => x.Key == "x-header-2-bin" && x.IsBinary);
+            responseHeaders.GetValueBytes("x-header-2-bin").ShouldBe(new byte[] { 1, 2, 3, 4 });
 
             // 2. Read from the response stream.
             var response = await serverStreaming.ResponseStream.ReadAllAsync(TimeoutToken).FirstAsync(TimeoutToken);
-            response.Message.Should().Be("#1");
+            response.Message.ShouldBe("#1");
 
             // The response stream has ended.
-            (await serverStreaming.ResponseStream.MoveNext(TimeoutToken)).Should().BeFalse();
+            (await serverStreaming.ResponseStream.MoveNext(TimeoutToken)).ShouldBeFalse();
         }
 
         class GreeterServiceWithHeadersNoTrailersResponseBeforeRequest : Greeter.GreeterBase
@@ -150,14 +150,14 @@ namespace GrpcWebSocketBridge.Tests.FunctionalTests
             var serverStreaming = client.SayHelloServerStreaming(new HelloRequest { Name = "Req#1" }, headers);
 
             // The response stream has ended.
-            (await serverStreaming.ResponseStream.MoveNext(TimeoutToken)).Should().BeFalse();
+            (await serverStreaming.ResponseStream.MoveNext(TimeoutToken)).ShouldBeFalse();
 
             await host.LastRequest.Completed;
 
-            host.LastRequest.Items["Server:x-header-1:Value"].Should().Be("value1");
-            host.LastRequest.Items["Server:x-header-1:IsBinary"].Should().Be(false);
-            host.LastRequest.Items["Server:x-header-2-bin:ValueBytes"].Should().BeEquivalentTo(new byte[] {1, 2, 3, 4});
-            host.LastRequest.Items["Server:x-header-2-bin:IsBinary"].Should().Be(true);
+            host.LastRequest.Items["Server:x-header-1:Value"].ShouldBe("value1");
+            host.LastRequest.Items["Server:x-header-1:IsBinary"].ShouldBe(false);
+            host.LastRequest.Items["Server:x-header-2-bin:ValueBytes"].ShouldBe(new byte[] {1, 2, 3, 4});
+            host.LastRequest.Items["Server:x-header-2-bin:IsBinary"].ShouldBe(true);
         }
 
         class GreeterServiceWithRequestHeadersNoTrailersResponseBeforeRequest : Greeter.GreeterBase
@@ -182,17 +182,17 @@ namespace GrpcWebSocketBridge.Tests.FunctionalTests
             var client = new Greeter.GreeterClient(channel);
             var serverStreaming = client.SayHelloServerStreaming(new HelloRequest { Name = "Req#1" });
 
-            Assert.Throws<InvalidOperationException>(() => serverStreaming.GetStatus());
-            Assert.Throws<InvalidOperationException>(() => serverStreaming.GetTrailers());
+            Should.Throw<InvalidOperationException>(() => serverStreaming.GetStatus());
+            Should.Throw<InvalidOperationException>(() => serverStreaming.GetTrailers());
 
             // The response stream has ended.
-            (await serverStreaming.ResponseStream.MoveNext(TimeoutToken)).Should().BeFalse();
+            (await serverStreaming.ResponseStream.MoveNext(TimeoutToken)).ShouldBeFalse();
 
             var status = serverStreaming.GetStatus();
             var responseTrailers = serverStreaming.GetTrailers();
-            responseTrailers.Should().Contain(x => x.Key == "x-trailer-1");
-            responseTrailers.Should().Contain(x => x.Key == "x-trailer-2-bin" && x.IsBinary);
-            responseTrailers.GetValueBytes("x-trailer-2-bin").Should().Equal(new byte[] { 5, 4, 3, 2, 1 });
+            responseTrailers.ShouldContain(x => x.Key == "x-trailer-1");
+            responseTrailers.ShouldContain(x => x.Key == "x-trailer-2-bin" && x.IsBinary);
+            responseTrailers.GetValueBytes("x-trailer-2-bin").ShouldBe(new byte[] { 5, 4, 3, 2, 1 });
         }
 
         class GreeterServiceNoHeadersWithResponseTrailers : Greeter.GreeterBase
@@ -217,7 +217,7 @@ namespace GrpcWebSocketBridge.Tests.FunctionalTests
             // Executing SayHelloServerStreaming will be complete immediately. And the response stream will be also done immediately.
             await serverStreaming.ResponseHeadersAsync.WithCancellation(TimeoutToken);
             var responses = await serverStreaming.ResponseStream.ReadAllAsync(TimeoutToken).ToArrayAsync(TimeoutToken);
-            responses.Should().BeEmpty();
+            responses.ShouldBeEmpty();
         }
 
         class GreeterServiceNoRequestResponseImmediately : Greeter.GreeterBase
@@ -238,7 +238,9 @@ namespace GrpcWebSocketBridge.Tests.FunctionalTests
             var client = new Greeter.GreeterClient(channel);
             var serverStreaming = client.SayHelloServerStreaming(new HelloRequest { Name = "Req#1" });
 
-            await Assert.ThrowsAsync<TimeoutException>(async () => await serverStreaming.ResponseStream.ReadAllAsync(TimeoutToken).ToArrayAsync(TimeoutToken).WithTimeout(TimeSpan.FromSeconds(1)));
+            await Should.ThrowAsync<TimeoutException>(async () => 
+                await serverStreaming.ResponseStream.ReadAllAsync(TimeoutToken).ToArrayAsync(TimeoutToken).WithTimeout(TimeSpan.FromSeconds(1))
+            );
         }
 
         class GreeterServiceIncompleteResponse : Greeter.GreeterBase
@@ -266,11 +268,11 @@ namespace GrpcWebSocketBridge.Tests.FunctionalTests
                 sb.Append(i);
             }
 
-            (await serverStreaming.ResponseStream.MoveNext(TimeoutToken)).Should().BeTrue();
-            serverStreaming.ResponseStream.Current.Message.Should().Be(sb.ToString());
+            (await serverStreaming.ResponseStream.MoveNext(TimeoutToken)).ShouldBeTrue();
+            serverStreaming.ResponseStream.Current.Message.ShouldBe(sb.ToString());
 
-            (await serverStreaming.ResponseStream.MoveNext(TimeoutToken)).Should().BeTrue();
-            serverStreaming.ResponseStream.Current.Message.Should().Be("#2");
+            (await serverStreaming.ResponseStream.MoveNext(TimeoutToken)).ShouldBeTrue();
+            serverStreaming.ResponseStream.Current.Message.ShouldBe("#2");
         }
 
         class GreeterServiceLargePayloadResponse : Greeter.GreeterBase

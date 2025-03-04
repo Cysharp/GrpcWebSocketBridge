@@ -6,7 +6,7 @@ using System.IO.Pipelines;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
-using FluentAssertions;
+using Shouldly;
 using GrpcWebSocketBridge.Tests.Helpers;
 using Xunit;
 
@@ -24,7 +24,7 @@ namespace GrpcWebSocketBridge.Tests.UnitTests
             {
             });
 
-            reader.TryRead(arrayBuffer.WrittenMemory, out var result).Should().BeFalse();
+            reader.TryRead(arrayBuffer.WrittenMemory, out var result).ShouldBeFalse();
         }
 
         [Fact]
@@ -44,13 +44,13 @@ namespace GrpcWebSocketBridge.Tests.UnitTests
                 0x48, 0x65, 0x6c, 0x6c, 0x6f
             });
 
-            reader.TryRead(arrayBuffer.WrittenMemory, out var result).Should().BeTrue();
-            result.Type.Should().Be(GrpcWebSocketBufferReader.BufferReadResultType.Content);
-            result.Consumed.Should().Be(1 + 4);
+            reader.TryRead(arrayBuffer.WrittenMemory, out var result).ShouldBeTrue();
+            result.Type.ShouldBe(GrpcWebSocketBufferReader.BufferReadResultType.Content);
+            result.Consumed.ShouldBe(1 + 4);
 
-            reader.TryRead(arrayBuffer.WrittenMemory.Slice(result.Consumed), out result).Should().BeTrue();
-            result.Type.Should().Be(GrpcWebSocketBufferReader.BufferReadResultType.Content);
-            result.Consumed.Should().Be(5);
+            reader.TryRead(arrayBuffer.WrittenMemory.Slice(result.Consumed), out result).ShouldBeTrue();
+            result.Type.ShouldBe(GrpcWebSocketBufferReader.BufferReadResultType.Content);
+            result.Consumed.ShouldBe(5);
         }
 
         [Fact]
@@ -70,13 +70,13 @@ namespace GrpcWebSocketBridge.Tests.UnitTests
                 0x41
             });
 
-            reader.TryRead(arrayBuffer.WrittenMemory, out var result).Should().BeTrue();
-            result.Type.Should().Be(GrpcWebSocketBufferReader.BufferReadResultType.Content);
-            result.Consumed.Should().Be(1 + 4);
+            reader.TryRead(arrayBuffer.WrittenMemory, out var result).ShouldBeTrue();
+            result.Type.ShouldBe(GrpcWebSocketBufferReader.BufferReadResultType.Content);
+            result.Consumed.ShouldBe(1 + 4);
 
-            reader.TryRead(arrayBuffer.WrittenMemory.Slice(result.Consumed), out result).Should().BeTrue();
-            result.Type.Should().Be(GrpcWebSocketBufferReader.BufferReadResultType.Content);
-            result.Consumed.Should().Be(1);
+            reader.TryRead(arrayBuffer.WrittenMemory.Slice(result.Consumed), out result).ShouldBeTrue();
+            result.Type.ShouldBe(GrpcWebSocketBufferReader.BufferReadResultType.Content);
+            result.Consumed.ShouldBe(1);
         }
 
         [Fact]
@@ -107,13 +107,13 @@ namespace GrpcWebSocketBridge.Tests.UnitTests
             });
 
             // Read the header of gRPC data payload.
-            reader.TryRead(arrayBuffer.WrittenMemory, out var result).Should().BeTrue();
-            result.Type.Should().Be(GrpcWebSocketBufferReader.BufferReadResultType.Header);
-            result.Consumed.Should().Be(1 + 4 + 22);
+            reader.TryRead(arrayBuffer.WrittenMemory, out var result).ShouldBeTrue();
+            result.Type.ShouldBe(GrpcWebSocketBufferReader.BufferReadResultType.Header);
+            result.Consumed.ShouldBe(1 + 4 + 22);
 
             var headers = result.HeadersOrTrailers;
-            headers.Should().Contain(x => x.Key == "Foo");
-            headers.Should().Contain(x => x.Key == "x-hoge");
+            headers.ShouldContain(x => x.Key == "Foo");
+            headers.ShouldContain(x => x.Key == "x-hoge");
         }
 
         [Fact]
@@ -148,14 +148,14 @@ namespace GrpcWebSocketBridge.Tests.UnitTests
             });
 
             // Read the header of gRPC data payload.
-            reader.TryRead(arrayBuffer.WrittenMemory, out var result).Should().BeTrue();
-            result.Type.Should().Be(GrpcWebSocketBufferReader.BufferReadResultType.Header);
-            result.Consumed.Should().Be(1 + 4 + 36);
+            reader.TryRead(arrayBuffer.WrittenMemory, out var result).ShouldBeTrue();
+            result.Type.ShouldBe(GrpcWebSocketBufferReader.BufferReadResultType.Header);
+            result.Consumed.ShouldBe(1 + 4 + 36);
 
             var headers = result.HeadersOrTrailers;
-            headers.Should().Contain(x => x.Key == "Foo");
-            headers.Should().Contain(x => x.Key == "x-hoge");
-            headers.GetValues("x-hoge").Should().BeEquivalentTo("fuga", "hoge");
+            headers.ShouldContain(x => x.Key == "Foo");
+            headers.ShouldContain(x => x.Key == "x-hoge");
+            headers.GetValues("x-hoge").ShouldBe(new[] {"fuga", "hoge"});
         }
 
         [Fact]
@@ -173,7 +173,7 @@ namespace GrpcWebSocketBridge.Tests.UnitTests
                 0x00, 0x00, 0x00, 0x16,
             });
             // Read the header of gRPC data payload.
-            reader.TryRead(arrayBuffer.WrittenMemory, out var result).Should().BeFalse();
+            reader.TryRead(arrayBuffer.WrittenMemory, out var result).ShouldBeFalse();
 
             // Remain
             arrayBuffer.Write(new byte[]
@@ -181,13 +181,13 @@ namespace GrpcWebSocketBridge.Tests.UnitTests
                 // "Foo: Bar" + "\r\n" + "x-hoge: fuga"
                 0x46, 0x6f, 0x6f, 0x3a, 0x20, 0x42, 0x61, 0x72, 0x0d, 0x0a, 0x78, 0x2d, 0x68, 0x6f, 0x67, 0x65, 0x3a, 0x20, 0x66, 0x75, 0x67, 0x61,
             });
-            reader.TryRead(arrayBuffer.WrittenMemory, out result).Should().BeTrue();
-            result.Type.Should().Be(GrpcWebSocketBufferReader.BufferReadResultType.Header);
-            result.Consumed.Should().Be(1 + 4 + 22);
+            reader.TryRead(arrayBuffer.WrittenMemory, out result).ShouldBeTrue();
+            result.Type.ShouldBe(GrpcWebSocketBufferReader.BufferReadResultType.Header);
+            result.Consumed.ShouldBe(1 + 4 + 22);
 
             var headers = result.HeadersOrTrailers;
-            headers.Should().Contain(x => x.Key == "Foo");
-            headers.Should().Contain(x => x.Key == "x-hoge");
+            headers.ShouldContain(x => x.Key == "Foo");
+            headers.ShouldContain(x => x.Key == "x-hoge");
         }
 
         [Fact]
@@ -229,29 +229,29 @@ namespace GrpcWebSocketBridge.Tests.UnitTests
 
             // Read the header of gRPC data payload.
             var memory = arrayBuffer.WrittenMemory;
-            reader.TryRead(memory, out var result).Should().BeTrue();
-            result.Type.Should().Be(GrpcWebSocketBufferReader.BufferReadResultType.Header);
-            result.Consumed.Should().Be(1 + 4 + 22);
+            reader.TryRead(memory, out var result).ShouldBeTrue();
+            result.Type.ShouldBe(GrpcWebSocketBufferReader.BufferReadResultType.Header);
+            result.Consumed.ShouldBe(1 + 4 + 22);
 
             var headers = result.HeadersOrTrailers;
-            headers.Should().Contain(x => x.Key == "Foo");
-            headers.Should().Contain(x => x.Key == "x-hoge");
+            headers.ShouldContain(x => x.Key == "Foo");
+            headers.ShouldContain(x => x.Key == "x-hoge");
 
             // Advance
             memory = memory.Slice(result.Consumed);
 
             // Read the data content.
-            reader.TryRead(memory, out result).Should().BeTrue();
-            result.Type.Should().Be(GrpcWebSocketBufferReader.BufferReadResultType.Content);
-            result.Consumed.Should().Be(1 + 4);
+            reader.TryRead(memory, out result).ShouldBeTrue();
+            result.Type.ShouldBe(GrpcWebSocketBufferReader.BufferReadResultType.Content);
+            result.Consumed.ShouldBe(1 + 4);
 
             // Advance
             memory = memory.Slice(result.Consumed);
 
-            reader.TryRead(memory, out result).Should().BeTrue();
-            result.Type.Should().Be(GrpcWebSocketBufferReader.BufferReadResultType.Content);
-            result.Consumed.Should().Be(11);
-            Encoding.UTF8.GetString(result.Data.Span).Should().Be("Hello Alice");
+            reader.TryRead(memory, out result).ShouldBeTrue();
+            result.Type.ShouldBe(GrpcWebSocketBufferReader.BufferReadResultType.Content);
+            result.Consumed.ShouldBe(11);
+            Encoding.UTF8.GetString(result.Data.Span).ShouldBe("Hello Alice");
         }
 
         [Fact]
@@ -293,46 +293,46 @@ namespace GrpcWebSocketBridge.Tests.UnitTests
 
             // Read the header of gRPC data payload.
             var memory = arrayBuffer.WrittenMemory;
-            reader.TryRead(memory, out var result).Should().BeTrue();
-            result.Type.Should().Be(GrpcWebSocketBufferReader.BufferReadResultType.Header);
-            result.Consumed.Should().Be(1 + 4 + 22);
+            reader.TryRead(memory, out var result).ShouldBeTrue();
+            result.Type.ShouldBe(GrpcWebSocketBufferReader.BufferReadResultType.Header);
+            result.Consumed.ShouldBe(1 + 4 + 22);
 
             var headers = result.HeadersOrTrailers;
-            headers.Should().Contain(x => x.Key == "Foo");
-            headers.Should().Contain(x => x.Key == "x-hoge");
+            headers.ShouldContain(x => x.Key == "Foo");
+            headers.ShouldContain(x => x.Key == "x-hoge");
 
             // Advance
             memory = memory.Slice(result.Consumed);
 
             // Read the data content.
-            reader.TryRead(memory, out result).Should().BeTrue();
-            result.Type.Should().Be(GrpcWebSocketBufferReader.BufferReadResultType.Content);
-            result.Consumed.Should().Be(1 + 4);
+            reader.TryRead(memory, out result).ShouldBeTrue();
+            result.Type.ShouldBe(GrpcWebSocketBufferReader.BufferReadResultType.Content);
+            result.Consumed.ShouldBe(1 + 4);
 
             // Advance
             memory = memory.Slice(result.Consumed);
 
-            reader.TryRead(memory, out result).Should().BeTrue();
-            result.Type.Should().Be(GrpcWebSocketBufferReader.BufferReadResultType.Content);
-            result.Consumed.Should().Be(11);
-            Encoding.UTF8.GetString(result.Data.Span).Should().Be("Hello Alice");
+            reader.TryRead(memory, out result).ShouldBeTrue();
+            result.Type.ShouldBe(GrpcWebSocketBufferReader.BufferReadResultType.Content);
+            result.Consumed.ShouldBe(11);
+            Encoding.UTF8.GetString(result.Data.Span).ShouldBe("Hello Alice");
 
             // Advance
             memory = memory.Slice(result.Consumed);
 
-            reader.TryRead(memory, out result).Should().BeTrue();
-            result.Type.Should().Be(GrpcWebSocketBufferReader.BufferReadResultType.Trailer);
-            result.Consumed.Should().Be(1 + 4 + 28);
+            reader.TryRead(memory, out result).ShouldBeTrue();
+            result.Type.ShouldBe(GrpcWebSocketBufferReader.BufferReadResultType.Trailer);
+            result.Consumed.ShouldBe(1 + 4 + 28);
 
             var trailers = result.HeadersOrTrailers;
-            trailers.Should().Contain(x => x.Key == "grpc-status");
-            trailers.Should().Contain(x => x.Key == "x-hoge");
+            trailers.ShouldContain(x => x.Key == "grpc-status");
+            trailers.ShouldContain(x => x.Key == "x-hoge");
 
             // Advance
             memory = memory.Slice(result.Consumed);
 
             // End of stream
-            Assert.Throws<InvalidOperationException>(() => reader.TryRead(memory, out result));
+            Should.Throw<InvalidOperationException>(() => reader.TryRead(memory, out result));
         }
 
         [Fact]
@@ -355,9 +355,9 @@ namespace GrpcWebSocketBridge.Tests.UnitTests
 
             // Read the header of gRPC data payload.
             var memory = arrayBuffer.WrittenMemory;
-            reader.TryRead(memory, out var result).Should().BeTrue();
-            result.Type.Should().Be(GrpcWebSocketBufferReader.BufferReadResultType.Header);
-            result.Consumed.Should().Be(1 + 4 + 22);
+            reader.TryRead(memory, out var result).ShouldBeTrue();
+            result.Type.ShouldBe(GrpcWebSocketBufferReader.BufferReadResultType.Header);
+            result.Consumed.ShouldBe(1 + 4 + 22);
             consumed += result.Consumed;
 
             // gRPC data payload
@@ -366,7 +366,7 @@ namespace GrpcWebSocketBridge.Tests.UnitTests
                 // No-compression
                 0b00000000,
             });
-            reader.TryRead(arrayBuffer.WrittenMemory.Slice(consumed), out result).Should().BeFalse();
+            reader.TryRead(arrayBuffer.WrittenMemory.Slice(consumed), out result).ShouldBeFalse();
 
             arrayBuffer.Write(new byte[]
             {
@@ -374,9 +374,9 @@ namespace GrpcWebSocketBridge.Tests.UnitTests
                 0x00, 0x00, 0x00, 0x0b,
             });
 
-            reader.TryRead(arrayBuffer.WrittenMemory.Slice(consumed), out result).Should().BeTrue();
-            result.Type.Should().Be(GrpcWebSocketBufferReader.BufferReadResultType.Content);
-            result.Consumed.Should().Be(1 + 4);
+            reader.TryRead(arrayBuffer.WrittenMemory.Slice(consumed), out result).ShouldBeTrue();
+            result.Type.ShouldBe(GrpcWebSocketBufferReader.BufferReadResultType.Content);
+            result.Consumed.ShouldBe(1 + 4);
             consumed += result.Consumed;
 
             arrayBuffer.Write(new byte[]
@@ -384,9 +384,9 @@ namespace GrpcWebSocketBridge.Tests.UnitTests
                 // "Hello"
                 0x48, 0x65, 0x6c, 0x6c, 0x6f, 0x20,
             });
-            reader.TryRead(arrayBuffer.WrittenMemory.Slice(consumed), out result).Should().BeTrue();
-            result.Type.Should().Be(GrpcWebSocketBufferReader.BufferReadResultType.Content);
-            result.Consumed.Should().Be(6);
+            reader.TryRead(arrayBuffer.WrittenMemory.Slice(consumed), out result).ShouldBeTrue();
+            result.Type.ShouldBe(GrpcWebSocketBufferReader.BufferReadResultType.Content);
+            result.Consumed.ShouldBe(6);
             consumed += result.Consumed;
 
             arrayBuffer.Write(new byte[]
@@ -394,9 +394,9 @@ namespace GrpcWebSocketBridge.Tests.UnitTests
                 // "Alice"
                 0x41, 0x6c, 0x69, 0x63, 0x65,
             });
-            reader.TryRead(arrayBuffer.WrittenMemory.Slice(consumed), out result).Should().BeTrue();
-            result.Type.Should().Be(GrpcWebSocketBufferReader.BufferReadResultType.Content);
-            result.Consumed.Should().Be(5);
+            reader.TryRead(arrayBuffer.WrittenMemory.Slice(consumed), out result).ShouldBeTrue();
+            result.Type.ShouldBe(GrpcWebSocketBufferReader.BufferReadResultType.Content);
+            result.Consumed.ShouldBe(5);
             consumed += result.Consumed;
 
             // Trailer
@@ -410,13 +410,13 @@ namespace GrpcWebSocketBridge.Tests.UnitTests
                 0x67, 0x72, 0x70, 0x63, 0x2d, 0x73, 0x74, 0x61, 0x74, 0x75, 0x73, 0x3a, 0x20, 0x30, 0x0d, 0x0a, 0x78, 0x2d, 0x68, 0x6f, 0x67, 0x65, 0x3a, 0x20, 0x66, 0x75, 0x67, 0x61,
             });
 
-            reader.TryRead(arrayBuffer.WrittenMemory.Slice(consumed), out result).Should().BeTrue();
-            result.Type.Should().Be(GrpcWebSocketBufferReader.BufferReadResultType.Trailer);
-            result.Consumed.Should().Be(1 + 4 + 28);
+            reader.TryRead(arrayBuffer.WrittenMemory.Slice(consumed), out result).ShouldBeTrue();
+            result.Type.ShouldBe(GrpcWebSocketBufferReader.BufferReadResultType.Trailer);
+            result.Consumed.ShouldBe(1 + 4 + 28);
             consumed += result.Consumed;
 
             // Completed
-            Assert.Throws<InvalidOperationException>(() => reader.TryRead(memory, out result));
+            Should.Throw<InvalidOperationException>(() => reader.TryRead(memory, out result));
         }
     }
 }

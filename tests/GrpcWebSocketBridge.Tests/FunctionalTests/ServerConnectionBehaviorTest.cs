@@ -4,7 +4,7 @@ using System.Linq;
 using System.Text;
 using System.Threading;
 using System.Threading.Tasks;
-using FluentAssertions;
+using Shouldly;
 using Grpc.Core;
 using GrpcWebSocketBridge.Tests.Helpers;
 using GrpcWebSocketBridge.Tests.Protos;
@@ -47,7 +47,7 @@ namespace GrpcWebSocketBridge.Tests.FunctionalTests
 
             // Validate server logs.
             var events = host.GetAllLogEvents();
-            events.Should().NotContain(x => x.LogLevel >= LogLevel.Error);
+            events.ShouldNotContain(x => x.LogLevel >= LogLevel.Error);
         }
 
         class GreeterService_DisconnectFromClient_Duplex_Normally : Greeter.GreeterBase
@@ -80,9 +80,9 @@ namespace GrpcWebSocketBridge.Tests.FunctionalTests
 
             // Validate server logs.
             var events = host.GetAllLogEvents();
-            //events.Should().Contain(x => x.Message.Contains("Error reading message."));
-            events.Should().Contain(x => x.Message.Contains("Error when executing service method"));
-            events.Should().NotContain(x => x.Message.Contains("unhandled exception was thrown"));
+            //events.ShouldContain(x => x.Message.Contains("Error reading message."));
+            events.ShouldContain(x => x.Message.Contains("Error when executing service method"));
+            events.ShouldNotContain(x => x.Message.Contains("unhandled exception was thrown"));
         }
 
         class GreeterService_DisconnectFromClient_Duplex_Abort_RequestReading : Greeter.GreeterBase
@@ -122,8 +122,8 @@ namespace GrpcWebSocketBridge.Tests.FunctionalTests
 
             // Validate server logs.
             var events = host.GetAllLogEvents();
-            events.Should().Contain(x => x.Message.Contains("Error when executing service method"));
-            events.Should().NotContain(x => x.Message.Contains("unhandled exception was thrown"));
+            events.ShouldContain(x => x.Message.Contains("Error when executing service method"));
+            events.ShouldNotContain(x => x.Message.Contains("unhandled exception was thrown"));
         }
 
         class GreeterService_DisconnectFromClient_Duplex_Abort_ResponseWriting : Greeter.GreeterBase
