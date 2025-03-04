@@ -11,9 +11,8 @@ public class GrpcWebSocketBufferReaderTest : TimeoutTestBase
         var arrayBuffer = new ArrayBufferWriter<byte>();
         var reader = new GrpcWebSocketBufferReader();
 
-        arrayBuffer.Write(new byte[]
-        {
-        });
+        arrayBuffer.Write([
+        ]);
 
         reader.TryRead(arrayBuffer.WrittenMemory, out var result).ShouldBeFalse();
     }
@@ -148,7 +147,7 @@ public class GrpcWebSocketBufferReaderTest : TimeoutTestBase
         headers.ShouldNotBeNull();
         headers.ShouldContain(x => x.Key == "Foo");
         headers.ShouldContain(x => x.Key == "x-hoge");
-        headers.GetValues("x-hoge").ShouldBe(new[] {"fuga", "hoge"});
+        headers.GetValues("x-hoge").ShouldBe(["fuga", "hoge"]);
     }
 
     [Fact]

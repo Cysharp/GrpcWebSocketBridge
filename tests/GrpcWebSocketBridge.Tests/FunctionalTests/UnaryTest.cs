@@ -54,7 +54,7 @@ public class UnaryTest(ITestOutputHelper testOutputHelper) : UseTestServerTestBa
         var client = new Greeter.GreeterClient(channel);
         var headers = new Metadata();
         headers.Add("x-header-1", "value1");
-        headers.Add("x-header-2-bin", new byte[] { 1, 2, 3, 4 });
+        headers.Add("x-header-2-bin", [1, 2, 3, 4]);
 
         var response = await client.SayHelloAsync(new HelloRequest() { Name = "Alice" }, new CallOptions(headers, cancellationToken: TimeoutToken));
         response.Message.ShouldBe("Hello Alice");
@@ -95,7 +95,7 @@ public class UnaryTest(ITestOutputHelper testOutputHelper) : UseTestServerTestBa
 
         responseHeaders.ShouldContain(x => x.Key == "x-header-1");
         responseHeaders.ShouldContain(x => x.Key == "x-header-2-bin" && x.IsBinary);
-        responseHeaders.GetValueBytes("x-header-2-bin").ShouldBe(new byte[] { 1, 2, 3, 4 });
+        responseHeaders.GetValueBytes("x-header-2-bin").ShouldBe([1, 2, 3, 4]);
 
         var response = await request;
         response.Message.ShouldBe("Hello Alice");
@@ -107,7 +107,7 @@ public class UnaryTest(ITestOutputHelper testOutputHelper) : UseTestServerTestBa
         {
             var headers = new Metadata();
             headers.Add("x-header-1", "value1");
-            headers.Add("x-header-2-bin", new byte[] { 1, 2, 3, 4 });
+            headers.Add("x-header-2-bin", [1, 2, 3, 4]);
 
             await context.WriteResponseHeadersAsync(headers);
 
@@ -129,7 +129,7 @@ public class UnaryTest(ITestOutputHelper testOutputHelper) : UseTestServerTestBa
         var responseTrailers = request.GetTrailers();
         responseTrailers.ShouldContain(x => x.Key == "x-header-1");
         responseTrailers.ShouldContain(x => x.Key == "x-header-2-bin" && x.IsBinary);
-        responseTrailers.GetValueBytes("x-header-2-bin").ShouldBe(new byte[] { 1, 2, 3, 4 });
+        responseTrailers.GetValueBytes("x-header-2-bin").ShouldBe([1, 2, 3, 4]);
 
         response.Message.ShouldBe("Hello Alice");
     }
@@ -139,7 +139,7 @@ public class UnaryTest(ITestOutputHelper testOutputHelper) : UseTestServerTestBa
         public override async Task<HelloReply> SayHello(HelloRequest request, ServerCallContext context)
         {
             context.ResponseTrailers.Add("x-header-1", "value1");
-            context.ResponseTrailers.Add("x-header-2-bin", new byte[] { 1, 2, 3, 4 });
+            context.ResponseTrailers.Add("x-header-2-bin", [1, 2, 3, 4]);
 
             return new HelloReply { Message = "Hello " + request.Name };
         }

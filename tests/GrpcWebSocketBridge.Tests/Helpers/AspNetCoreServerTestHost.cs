@@ -16,7 +16,7 @@ namespace GrpcWebSocketBridge.Tests.Helpers;
 
 public static class AspNetCoreServerTestHost
 {
-    private readonly static HashSet<int> UsedPortInSession = new();
+    private readonly static HashSet<int> UsedPortInSession = [];
 
     public static AspNetCoreServerTestHost<TStartup> Create<TStartup>(ITestOutputHelper testOutputHelper, AspNetCoreServerTestHostOptions? options, CancellationToken shutdownToken)
         where TStartup : class, IStartup, new()
@@ -108,7 +108,7 @@ public class AspNetCoreServerTestHost<TStartup> : IAsyncDisposable
         _shutdownToken = shutdownToken;
         _shutdownCancellationRegistration = _shutdownToken.Register(async () => await this.DisposeAsync());
 
-        var builder = CreateHostBuilder(Array.Empty<string>());
+        var builder = CreateHostBuilder([]);
         var host = builder
             .ConfigureServices(services =>
             {

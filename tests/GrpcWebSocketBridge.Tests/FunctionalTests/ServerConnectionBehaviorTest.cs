@@ -41,7 +41,7 @@ public class ServerConnectionBehaviorTest(ITestOutputHelper testOutputHelper) : 
     {
         public override async Task SayHelloDuplex(IAsyncStreamReader<HelloRequest> requestStream, IServerStreamWriter<HelloReply> responseStream, ServerCallContext context)
         {
-            await context.WriteResponseHeadersAsync(new Metadata());
+            await context.WriteResponseHeadersAsync([]);
         }
     }
 
@@ -76,7 +76,7 @@ public class ServerConnectionBehaviorTest(ITestOutputHelper testOutputHelper) : 
     {
         public override async Task SayHelloDuplex(IAsyncStreamReader<HelloRequest> requestStream, IServerStreamWriter<HelloReply> responseStream, ServerCallContext context)
         {
-            await context.WriteResponseHeadersAsync(new Metadata());
+            await context.WriteResponseHeadersAsync([]);
             await requestStream.MoveNext(context.CancellationToken);
         }
     }
@@ -119,7 +119,7 @@ public class ServerConnectionBehaviorTest(ITestOutputHelper testOutputHelper) : 
         {
             var signal = context.GetHostStaticItem<WaitHandle>(nameof(GreeterService_DisconnectFromClient_Duplex_Abort_ResponseWriting));
 
-            await context.WriteResponseHeadersAsync(new Metadata());
+            await context.WriteResponseHeadersAsync([]);
 
             signal.WaitOne();
 

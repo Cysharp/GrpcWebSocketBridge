@@ -88,7 +88,7 @@ public class ClientStreamingTest(ITestOutputHelper testOutputHelper) : UseTestSe
         var responseHeaders = await clientStreaming.ResponseHeadersAsync.WithCancellation(TimeoutToken);
         responseHeaders.ShouldContain(x => x.Key == "x-header-1");
         responseHeaders.ShouldContain(x => x.Key == "x-header-2-bin" && x.IsBinary);
-        responseHeaders.GetValueBytes("x-header-2-bin").ShouldBe(new byte[] { 1, 2, 3, 4 });
+        responseHeaders.GetValueBytes("x-header-2-bin").ShouldBe([1, 2, 3, 4]);
 
         // Notify the request stream has ended.
         await clientStreaming.RequestStream.CompleteAsync();
@@ -104,7 +104,7 @@ public class ClientStreamingTest(ITestOutputHelper testOutputHelper) : UseTestSe
         {
             var headers = new Metadata();
             headers.Add("x-header-1", "value1");
-            headers.Add("x-header-2-bin", new byte[] { 1, 2, 3, 4 });
+            headers.Add("x-header-2-bin", [1, 2, 3, 4]);
 
             await context.WriteResponseHeadersAsync(headers);
 
@@ -134,7 +134,7 @@ public class ClientStreamingTest(ITestOutputHelper testOutputHelper) : UseTestSe
         var responseHeaders = await clientStreaming.ResponseHeadersAsync.WithCancellation(TimeoutToken);
         responseHeaders.ShouldContain(x => x.Key == "x-header-1");
         responseHeaders.ShouldContain(x => x.Key == "x-header-2-bin" && x.IsBinary);
-        responseHeaders.GetValueBytes("x-header-2-bin").ShouldBe(new byte[] { 1, 2, 3, 4 });
+        responseHeaders.GetValueBytes("x-header-2-bin").ShouldBe([1, 2, 3, 4]);
 
         // Notify the request stream has ended.
         await clientStreaming.RequestStream.CompleteAsync();
@@ -152,7 +152,7 @@ public class ClientStreamingTest(ITestOutputHelper testOutputHelper) : UseTestSe
 
             var headers = new Metadata();
             headers.Add("x-header-1", "value1");
-            headers.Add("x-header-2-bin", new byte[] { 1, 2, 3, 4 });
+            headers.Add("x-header-2-bin", [1, 2, 3, 4]);
 
             await context.WriteResponseHeadersAsync(headers);
             return new HelloReply() { Message = "#1" };
@@ -167,7 +167,7 @@ public class ClientStreamingTest(ITestOutputHelper testOutputHelper) : UseTestSe
 
         var headers = new Metadata();
         headers.Add("x-header-1", "value1");
-        headers.Add("x-header-2-bin", new byte[] { 1, 2, 3, 4 });
+        headers.Add("x-header-2-bin", [1, 2, 3, 4]);
 
         var client = new Greeter.GreeterClient(channel);
         var clientStreaming = client.SayHelloClientStreaming(headers);
@@ -220,7 +220,7 @@ public class ClientStreamingTest(ITestOutputHelper testOutputHelper) : UseTestSe
         var responseTrailers = duplex.GetTrailers();
         responseTrailers.ShouldContain(x => x.Key == "x-trailer-1");
         responseTrailers.ShouldContain(x => x.Key == "x-trailer-2-bin" && x.IsBinary);
-        responseTrailers.GetValueBytes("x-trailer-2-bin").ShouldBe(new byte[] { 5, 4, 3, 2, 1 });
+        responseTrailers.GetValueBytes("x-trailer-2-bin").ShouldBe([5, 4, 3, 2, 1]);
     }
 
     class GreeterServiceNoHeadersWithResponseTrailers : Greeter.GreeterBase
@@ -229,7 +229,7 @@ public class ClientStreamingTest(ITestOutputHelper testOutputHelper) : UseTestSe
         {
             await requestStream.MoveNext(context.CancellationToken);
             context.ResponseTrailers.Add("x-trailer-1", "trailerValue");
-            context.ResponseTrailers.Add("x-trailer-2-bin", new byte[] { 5, 4, 3, 2, 1 });
+            context.ResponseTrailers.Add("x-trailer-2-bin", [5, 4, 3, 2, 1]);
         }
     }
 
@@ -241,7 +241,7 @@ public class ClientStreamingTest(ITestOutputHelper testOutputHelper) : UseTestSe
 
         var headers = new Metadata();
         headers.Add("x-header-1", "value1");
-        headers.Add("x-header-2-bin", new byte[] { 1, 2, 3, 4 });
+        headers.Add("x-header-2-bin", [1, 2, 3, 4]);
 
         var client = new Greeter.GreeterClient(channel);
         var clientStreaming = client.SayHelloClientStreaming(headers);
