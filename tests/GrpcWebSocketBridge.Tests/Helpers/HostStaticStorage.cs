@@ -1,25 +1,23 @@
 using System.Collections.Concurrent;
-using System.Collections.Generic;
 using Grpc.Core;
 using Microsoft.Extensions.DependencyInjection;
 
-namespace GrpcWebSocketBridge.Tests.Helpers
+namespace GrpcWebSocketBridge.Tests.Helpers;
+
+public class HostStaticStorage
 {
-    public class HostStaticStorage
+    public ConcurrentDictionary<string, object> Items { get; } = new();
+}
+
+public static class HostStaticStorageExtensions
+{
+    public static IDictionary<string, object> GetHostStaticItems(this ServerCallContext serverCallContext)
     {
-        public ConcurrentDictionary<string, object> Items { get; } = new ConcurrentDictionary<string, object>();
+        return serverCallContext.GetHttpContext().RequestServices.GetRequiredService<HostStaticStorage>().Items;
     }
 
-    public static class HostStaticStorageExtensions
+    public static T GetHostStaticItem<T>(this ServerCallContext serverCallContext, string name)
     {
-        public static IDictionary<string, object> GetHostStaticItems(this ServerCallContext serverCallContext)
-        {
-            return serverCallContext.GetHttpContext().RequestServices.GetRequiredService<HostStaticStorage>().Items;
-        }
-
-        public static T GetHostStaticItem<T>(this ServerCallContext serverCallContext, string name)
-        {
-            return (T)serverCallContext.GetHttpContext().RequestServices.GetRequiredService<HostStaticStorage>().Items[name];
-        }
+        return (T)serverCallContext.GetHttpContext().RequestServices.GetRequiredService<HostStaticStorage>().Items[name];
     }
 }

@@ -2,6 +2,8 @@
 
   <PropertyGroup>
     <TargetFrameworks>net8.0</TargetFrameworks>
+    <ImplicitUsings>enable</ImplicitUsings>
+    <Nullable>enable</Nullable>
     <NoWarn>$(NoWarn);CS8632;CS1998</NoWarn>
     <IsPackable>false</IsPackable>
   </PropertyGroup>
