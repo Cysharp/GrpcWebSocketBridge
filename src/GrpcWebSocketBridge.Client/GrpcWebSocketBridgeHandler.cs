@@ -47,6 +47,7 @@ namespace GrpcWebSocketBridge.Client
         {
             lock (_ongoingWebSockets)
             {
+                webSocket.Dispose();
                 _ongoingWebSockets.Remove(webSocket);
             }
         }
