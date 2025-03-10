@@ -1,2 +1,7 @@
-﻿# CS1998: Async method lacks 'await' operators and will run synchronously
+﻿[*.cs]
+# CS1998: Async method lacks 'await' operators and will run synchronously
 dotnet_diagnostic.CS1998.severity = none
+
+# ReSharper: ClassNeverInstantiated.Local
+# https://www.jetbrains.com/help/resharper/ClassNeverInstantiated.Local.html
+resharper_class_never_instantiated_local_highlighting = none

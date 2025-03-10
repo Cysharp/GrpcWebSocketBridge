@@ -46,8 +46,10 @@ namespace GrpcWebSocketBridge.Client.Internal
                 AbortReason = e;
                 _connectionAborted.Cancel();
 
-                await RequestPipe.Reader.CompleteAsync(new IOException("The request was aborted.")).ConfigureAwait(false);
-                await ResponsePipe.Writer.CompleteAsync(new IOException("The request was aborted.")).ConfigureAwait(false);
+                // NOTE: On the browser, the exception here is propagated before the cancellation exception on the reading side, so OCE also needs to be correctly propagated.
+                var finalException = (e is OperationCanceledException) ? e : new IOException("The request was aborted.");
+                await RequestPipe.Reader.CompleteAsync(finalException).ConfigureAwait(false);
+                await ResponsePipe.Writer.CompleteAsync(finalException).ConfigureAwait(false);
 
                 _responseCompleted = true;
                 _requestCompleted = true;
