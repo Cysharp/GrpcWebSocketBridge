@@ -306,4 +306,35 @@ public class ClientConnectionBehaviorTest(ITestOutputHelper testOutputHelper) : 
             await Task.Delay(-1); // Never
         }
     }
+
+    [Fact]
+    public async Task CancelConnectionOnClient()
+    {
+        var host = CreateTestServer<StartupWithGrpcService<GreeterServiceDisconnectFromServerDuplexWaitForResponses>>(new AspNetCoreServerTestHostOptions() { ShutdownTimeout = TimeSpan.FromMilliseconds(100) });
+        using var channel = host.CreateChannel();
+        var client = new Greeter.GreeterClient(channel);
+        var duplex = client.SayHelloDuplex();
+
+        await duplex.ResponseHeadersAsync;
+
+        var cts = new CancellationTokenSource();
+        cts.CancelAfter(200);
+
+        var rpcException = await Should.ThrowAsync<RpcException>(async () => await duplex.ResponseStream.MoveNext(cts.Token)).WaitAsync(TimeoutToken);
+        rpcException.InnerException.ShouldBeOfType<OperationCanceledException>();
+    }
+
+    class GreeterServiceCancelConnectionOnClient : Greeter.GreeterBase
+    {
+        // Behavior: Connect -> SendResponse -> Receive Response -> Send Response -> Wait & Disconnect
+        public override async Task SayHelloDuplex(IAsyncStreamReader<HelloRequest> requestStream, IServerStreamWriter<HelloReply> responseStream, ServerCallContext context)
+        {
+            await context.WriteResponseHeadersAsync(new Metadata());
+
+            await requestStream.MoveNext(context.CancellationToken);
+
+            await Task.Delay(-1); // Never
+        }
+    }
+
 }
