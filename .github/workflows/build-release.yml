@@ -16,7 +16,7 @@ jobs:
   update-packagejson:
     uses: Cysharp/Actions/.github/workflows/update-packagejson.yaml@main
     with:
-      file-path: ./src/GrpcWebSocketBridge.Client.Unity/Assets/Plugins/GrpcWebSocketBridge/package.json
+      file-path: ./src/GrpcWebSocketBridge.Client/package.json
       tag: ${{ inputs.tag }}
       dry-run: ${{ inputs.dry-run }}
 
@@ -72,10 +72,7 @@ jobs:
       dry-run: ${{ inputs.dry-run }}
       tag: ${{ inputs.tag }}
       nuget-push: true
-      release-upload: true
-      release-asset-path: |
-        ./Grpc.Net.Client-ModifiedForWebGL.${{ inputs.tag }}.zip/Grpc.Net.Client-ModifiedForWebGL.${{ inputs.tag }}.zip
-        ./GrpcWebSocketBridge.${{ inputs.tag }}.unitypackage/GrpcWebSocketBridge.${{ inputs.tag }}.unitypackage
+      release-upload: false
       release-format: '{0}'
     secrets: inherit
 
