@@ -322,6 +322,9 @@ public class ClientConnectionBehaviorTest(ITestOutputHelper testOutputHelper) : 
 
         var rpcException = await Should.ThrowAsync<RpcException>(async () => await duplex.ResponseStream.MoveNext(cts.Token)).WaitAsync(TimeoutToken);
         rpcException.InnerException.ShouldBeOfType<OperationCanceledException>();
+
+        // Shutdown the server immediately.
+        await host.DisposeAsync();
     }
 
     class GreeterServiceCancelConnectionOnClient : Greeter.GreeterBase
