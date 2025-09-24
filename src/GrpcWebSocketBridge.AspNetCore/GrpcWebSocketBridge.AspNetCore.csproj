@@ -12,7 +12,6 @@
 
   <ItemGroup>
     <Compile Include="..\GrpcWebSocketBridge.Client\Internal\Shared\**\*.cs" LinkBase="Internal\Shared" />
-    <None Include="..\Icon.png" Pack="true" PackagePath="/" />
   </ItemGroup>
 
   <ItemGroup>
