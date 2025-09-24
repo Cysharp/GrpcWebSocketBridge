@@ -5,8 +5,8 @@
     <LangVersion>latest</LangVersion>
 
     <!-- NuGet Package Information -->
+    <IsPackable>false</IsPackable>
     <Description>Yet Another gRPC over HTTP/1 using WebSocket implementation, primarily targets .NET platform.</Description>
-
     <Company>Cysharp</Company>
     <Authors>Cysharp</Authors>
     <Copyright>© Cysharp, Inc.</Copyright>
@@ -21,6 +21,8 @@
   </PropertyGroup>
 
   <ItemGroup>
+    <None Include="$(MSBuildThisFileDirectory)Icon.png" Pack="true" PackagePath="\" />
     <None Include="$(MSBuildThisFileDirectory)README.md" Pack="true" PackagePath="\" />
+    <EmbeddedResource Include="$(MSBuildThisFileDirectory)LICENSE" />
   </ItemGroup>
 </Project>
