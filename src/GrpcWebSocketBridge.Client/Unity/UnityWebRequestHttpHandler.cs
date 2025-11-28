@@ -52,7 +52,7 @@ namespace GrpcWebSocketBridge.Client.Unity
             var response = new HttpResponseMessage((HttpStatusCode)webRequest.responseCode)
             {
                 RequestMessage = requestMessage,
-                Content = new ByteArrayContent(downloadHandler.data),
+                Content = new ByteArrayContent(downloadHandler.data ?? Array.Empty<byte>()),
                 Version = HttpVersion.Version10
             };
 
