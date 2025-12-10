@@ -1,4 +1,5 @@
 using System;
+using System.Net;
 using System.Net.WebSockets;
 using System.Threading;
 using System.Threading.Tasks;
@@ -9,9 +10,9 @@ namespace GrpcWebSocketBridge.Client.WebSockets
     {
         private readonly System.Net.WebSockets.ClientWebSocket _clientWebSocket;
 
-        public SystemNetWebSocketsClientWebSocket()
+        public SystemNetWebSocketsClientWebSocket(CookieContainer? cookieContainer = null)
         {
-            _clientWebSocket = new ClientWebSocket();
+            _clientWebSocket = new ClientWebSocket { Options = { Cookies = cookieContainer } };
         }
 
         public WebSocketState State => _clientWebSocket.State;
