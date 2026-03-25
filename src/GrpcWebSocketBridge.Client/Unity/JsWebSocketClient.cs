@@ -128,6 +128,7 @@ namespace GrpcWebSocketBridge.Client.Unity
 
         public void Dispose()
         {
+            CloseAsync(WebSocketCloseStatus.NormalClosure, "Disposed", CancellationToken.None);
             _ws.Dispose();
         }
 
@@ -159,7 +160,7 @@ namespace GrpcWebSocketBridge.Client.Unity
     public class JsWebSocket
     {
         private static Dictionary<int, JsWebSocket> _instanceByHandle = new Dictionary<int, JsWebSocket>();
-        
+
         private Queue<byte[]> _queue = new Queue<byte[]>();
         private TaskCompletionSource<byte[]> _receiveTcs;
         private int _handle;
