@@ -30,6 +30,8 @@ namespace GrpcWebSocketBridge.Client
 {
     public partial class GrpcWebSocketBridgeHandler : DelegatingHandler
     {
+        public CookieContainer? CookieContainer { get; set; }
+
         private readonly HashSet<IClientWebSocket> _ongoingWebSockets = new HashSet<IClientWebSocket>();
         private readonly bool _forceWebSocketMode = false;
 
