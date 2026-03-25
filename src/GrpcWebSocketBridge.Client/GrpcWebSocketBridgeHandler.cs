@@ -1,5 +1,4 @@
 // NET_STANDARD is .NET Standard 2.1 on Unity
-
 #if NET_STANDARD_2_0
 #define NETSTANDARD2_0
 #endif
@@ -13,10 +12,12 @@ using System;
 using System.Buffers;
 using System.Collections.Generic;
 using System.IO.Pipelines;
+using System.Linq;
 using System.Net;
 using System.Net.Http;
 using System.Net.Http.Headers;
 using System.Net.WebSockets;
+using System.Text;
 using System.Threading;
 using System.Threading.Tasks;
 using Grpc.AspNetCore.Web.Internal;
@@ -29,15 +30,12 @@ namespace GrpcWebSocketBridge.Client
 {
     public partial class GrpcWebSocketBridgeHandler : DelegatingHandler
     {
-        private readonly bool _forceWebSocketMode;
-
-        private readonly HashSet<IClientWebSocket> _ongoingWebSockets = new();
         public CookieContainer? CookieContainer { get; set; }
 
-        private static TaskCompletionSource<bool> CreateHeadersTaskCompletionSource()
-        {
-            return new TaskCompletionSource<bool>();
-        }
+        private readonly HashSet<IClientWebSocket> _ongoingWebSockets = new HashSet<IClientWebSocket>();
+        private readonly bool _forceWebSocketMode = false;
+
+        private static TaskCompletionSource<bool> CreateHeadersTaskCompletionSource() => new TaskCompletionSource<bool>();
 
         private void AddToOngoing(IClientWebSocket webSocket)
         {
@@ -56,17 +54,15 @@ namespace GrpcWebSocketBridge.Client
             }
         }
 
-        protected override Task<HttpResponseMessage> SendAsync(HttpRequestMessage request,
-            CancellationToken cancellationToken)
+        protected override Task<HttpResponseMessage> SendAsync(HttpRequestMessage request, CancellationToken cancellationToken)
         {
             // If the request invokes Unary method, use HTTP/1 transport instead of WebSocket.
-            return request.Content.GetType().Name.Contains("Unary") && !_forceWebSocketMode
+            return (request.Content.GetType().Name.Contains("Unary") && !_forceWebSocketMode)
                 ? SendWithHttpHandlerAsync(request, cancellationToken)
                 : SendWithWebSocketAsync(request, cancellationToken);
         }
 
-        private async Task<HttpResponseMessage> SendWithHttpHandlerAsync(HttpRequestMessage request,
-            CancellationToken cancellationToken)
+        private async Task<HttpResponseMessage> SendWithHttpHandlerAsync(HttpRequestMessage request, CancellationToken cancellationToken)
         {
             request.Version = HttpVersion.Version11; // NOTE: Force downgrade to HTTP/1.1
             request.Content = new GrpcWebRequestContent(request.Content);
@@ -89,8 +85,7 @@ namespace GrpcWebSocketBridge.Client
             return response;
         }
 
-        private async Task<HttpResponseMessage> SendWithWebSocketAsync(HttpRequestMessage request,
-            CancellationToken cancellationToken)
+        private async Task<HttpResponseMessage> SendWithWebSocketAsync(HttpRequestMessage request, CancellationToken cancellationToken)
         {
             request.Content = new GrpcWebSocketRequestContent(request.Content);
 
@@ -110,12 +105,12 @@ namespace GrpcWebSocketBridge.Client
 
             var arrayBufferWriter = new ArrayBufferWriter<byte>();
             GrpcWebProtocolHelpers.WriteTrailers(request.Headers, arrayBufferWriter);
-            await clientWebSocket.SendAsync(new ArraySegment<byte>(arrayBufferWriter.WrittenMemory.ToArray()),
-                WebSocketMessageType.Binary, true, cancellationToken).ConfigureAwait(false);
+            await clientWebSocket.SendAsync(new ArraySegment<byte>(arrayBufferWriter.WrittenMemory.ToArray()), WebSocketMessageType.Binary, true, cancellationToken).ConfigureAwait(false);
 
             var response = new HttpResponseMessage(HttpStatusCode.OK)
             {
-                Version = GrpcProtocolConstants.Http2Version, RequestMessage = request
+                Version = GrpcProtocolConstants.Http2Version,
+                RequestMessage = request,
             };
 #if NETSTANDARD2_0
             response.EnsureTrailingHeaders();
@@ -125,8 +120,7 @@ namespace GrpcWebSocketBridge.Client
             var requestPushTask = ProcessRequestAsync(clientWebSocket, request, ctx, cancellationToken);
             var responseTask = ProcessResponseAsync(clientWebSocket, response, ctx, cancellationToken);
 
-            var responseContent =
-                new GrpcWebSocketResponseContent(ctx.ResponsePipe.Reader, () => RemoveFromOngoing(clientWebSocket));
+            var responseContent = new GrpcWebSocketResponseContent(ctx.ResponsePipe.Reader, () => RemoveFromOngoing(clientWebSocket));
             responseContent.Headers.ContentType = new MediaTypeHeaderValue(GrpcProtocolConstants.GrpcContentType);
             response.Content = responseContent;
 
@@ -136,11 +130,9 @@ namespace GrpcWebSocketBridge.Client
         }
 
 
-        private async Task ProcessRequestAsync(IClientWebSocket clientWebSocket, HttpRequestMessage request,
-            ConnectionContext ctx, CancellationToken cancellationToken)
+        private async Task ProcessRequestAsync(IClientWebSocket clientWebSocket, HttpRequestMessage request, ConnectionContext ctx, CancellationToken cancellationToken)
         {
-            cancellationToken = CancellationTokenSource
-                .CreateLinkedTokenSource(cancellationToken, ctx.ConnectionAborted).Token;
+            cancellationToken = CancellationTokenSource.CreateLinkedTokenSource(cancellationToken, ctx.ConnectionAborted).Token;
 
             _ = request.Content.CopyToAsync(ctx.RequestPipe.Writer.AsStream()).ConfigureAwait(false);
 
@@ -155,9 +147,7 @@ namespace GrpcWebSocketBridge.Client
                         try
                         {
                             result.Buffer.CopyTo(buffer);
-                            await clientWebSocket
-                                .SendAsync(new ArraySegment<byte>(buffer, 0, (int)result.Buffer.Length),
-                                    WebSocketMessageType.Binary, true, cancellationToken).ConfigureAwait(false);
+                            await clientWebSocket.SendAsync(new ArraySegment<byte>(buffer, 0, (int)result.Buffer.Length), WebSocketMessageType.Binary, true, cancellationToken).ConfigureAwait(false);
                         }
                         finally
                         {
@@ -181,11 +171,8 @@ namespace GrpcWebSocketBridge.Client
             {
                 try
                 {
-                    //TODO: Sending this packet breaks websocket graceful completion as the server stops listening to any incoming packets after receiving this one
-                    //TODO: The actual change should happen server-side to continue listening for frames even after receiving this packet
-                    //TODO: Removing this line fixes websocket termination for Client and Duplex streaming but brakes Server streaming because a completed RequestStream is required
                     // Send a empty trailer for completion.
-                    //await clientWebSocket.SendAsync(new ArraySegment<byte>(new byte[] { 0b10000000, 0x00, 0x00, 0x00, 0x00 }), WebSocketMessageType.Binary, true, cancellationToken).ConfigureAwait(false);
+                    await clientWebSocket.SendAsync(new ArraySegment<byte>(new byte[] { 0b10000000, 0x00, 0x00, 0x00, 0x00 }), WebSocketMessageType.Binary, true, cancellationToken).ConfigureAwait(false);
                 }
                 catch (WebSocketException e) when (e.WebSocketErrorCode == WebSocketError.InvalidState)
                 {
@@ -198,22 +185,19 @@ namespace GrpcWebSocketBridge.Client
             }
         }
 
-        private async Task ProcessResponseAsync(IClientWebSocket clientWebSocket, HttpResponseMessage response,
-            ConnectionContext ctx, CancellationToken cancellationToken)
+        private async Task ProcessResponseAsync(IClientWebSocket clientWebSocket, HttpResponseMessage response, ConnectionContext ctx, CancellationToken cancellationToken)
         {
-            cancellationToken = CancellationTokenSource
-                .CreateLinkedTokenSource(cancellationToken, ctx.ConnectionAborted).Token;
+            cancellationToken = CancellationTokenSource.CreateLinkedTokenSource(cancellationToken, ctx.ConnectionAborted).Token;
 
             var reader = new GrpcWebSocketBufferReader();
-            var buffer = ArrayPool<byte>.Shared.Rent(32 * 1024);
+            var buffer = ArrayPool<byte>.Shared.Rent(minimumLength: 32 * 1024);
             var bufferWriter = new ArrayBufferWriter<byte>();
             var readOffset = 0;
             try
             {
                 while (clientWebSocket.State == WebSocketState.Open && !cancellationToken.IsCancellationRequested)
                 {
-                    var result = await clientWebSocket.ReceiveAsync(new ArraySegment<byte>(buffer), cancellationToken)
-                        .ConfigureAwait(false);
+                    var result = await clientWebSocket.ReceiveAsync(new ArraySegment<byte>(buffer), cancellationToken).ConfigureAwait(false);
                     if (result.Count > 0)
                     {
                         bufferWriter.Write(buffer.AsSpan(0, result.Count));
@@ -230,7 +214,6 @@ namespace GrpcWebSocketBridge.Client
                                     {
                                         response.Headers.TryAddWithoutValidation(keyValue.Key, keyValue.Value);
                                     }
-
                                     ctx.SignalResponseHeaderHasReceived();
                                     break;
                                 case GrpcWebSocketBufferReader.BufferReadResultType.Trailer:
@@ -244,8 +227,7 @@ namespace GrpcWebSocketBridge.Client
                                     await ctx.CompleteResponseAsync().ConfigureAwait(false);
                                     return;
                                 case GrpcWebSocketBufferReader.BufferReadResultType.Content:
-                                    await ctx.ResponsePipe.Writer.WriteAsync(readResult.Data, cancellationToken)
-                                        .ConfigureAwait(false);
+                                    await ctx.ResponsePipe.Writer.WriteAsync(readResult.Data, cancellationToken).ConfigureAwait(false);
                                     break;
                             }
 
@@ -286,7 +268,6 @@ namespace GrpcWebSocketBridge.Client
                     {
                         clientWebSocket.Dispose();
                     }
-
                     _ongoingWebSockets.Clear();
                 }
             }
