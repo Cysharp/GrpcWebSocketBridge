@@ -33,12 +33,14 @@ jobs:
     timeout-minutes: 10
     steps:
       - uses: Cysharp/Actions/.github/actions/checkout@main
+        with:
+          ref: ${{ needs.update-packagejson.outputs.sha }}
       - uses: Cysharp/Actions/.github/actions/setup-dotnet@main
       # Build & Pack
       - run: dotnet build ./src/GrpcWebSocketBridge.AspNetCore/ -c Release -p:VersionSuffix=${{ inputs.tag }}
       - run: dotnet build ./src/GrpcWebSocketBridge.Client/ -c Release -p:VersionSuffix=${{ inputs.tag }}
-      - run: dotnet pack -c Release --include-symbols --include-source --no-build -p:VersionPrefix=${{ inputs.tag }} -o ./publish/ ./src/GrpcWebSocketBridge.AspNetCore
-      - run: dotnet pack -c Release --include-symbols --include-source --no-build -p:VersionPrefix=${{ inputs.tag }} -o ./publish/ ./src/GrpcWebSocketBridge.Client
+      - run: dotnet pack -c Release --include-source --no-build -p:IncludeSymbols=true -p:SymbolPackageFormat=snupkg -p:VersionPrefix=${{ inputs.tag }} -o ./publish/ ./src/GrpcWebSocketBridge.AspNetCore
+      - run: dotnet pack -c Release --include-source --no-build -p:IncludeSymbols=true -p:SymbolPackageFormat=snupkg -p:VersionPrefix=${{ inputs.tag }} -o ./publish/ ./src/GrpcWebSocketBridge.Client
       - uses: Cysharp/Actions/.github/actions/upload-artifact@main
         with:
           name: nuget
@@ -51,6 +53,10 @@ jobs:
         with:
           user: ${{ secrets.NUGET_USER }}
       - run: dotnet nuget push "./publish/*.nupkg" --skip-duplicate -s https://api.nuget.org/v3/index.json -k "${NUGET_KEY}"
+        if: ${{ !inputs.dry-run }}
+        env:
+          NUGET_KEY: ${{ steps.login.outputs.NUGET_API_KEY }}
+      - run: dotnet nuget push "./publish/*.snupkg" --skip-duplicate -s https://api.nuget.org/v3/index.json -k "${NUGET_KEY}"
         if: ${{ !inputs.dry-run }}
         env:
           NUGET_KEY: ${{ steps.login.outputs.NUGET_API_KEY }}
