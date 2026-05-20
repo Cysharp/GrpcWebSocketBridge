@@ -27,6 +27,7 @@ jobs:
     name: "Build & pack GrpcWebSocketBridge"
     permissions:
       contents: read
+      id-token: write # required for NuGet Trusted Publish
     runs-on: ubuntu-24.04
     needs: [update-packagejson]
     timeout-minutes: 10
