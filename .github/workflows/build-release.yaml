@@ -32,12 +32,14 @@ jobs:
     timeout-minutes: 10
     steps:
       - uses: Cysharp/Actions/.github/actions/checkout@main
+        with:
+          ref: ${{ needs.update-packagejson.outputs.sha }}
       - uses: Cysharp/Actions/.github/actions/setup-dotnet@main
       # Build & Pack
       - run: dotnet build ./src/GrpcWebSocketBridge.AspNetCore/ -c Release -p:VersionSuffix=${{ inputs.tag }}
       - run: dotnet build ./src/GrpcWebSocketBridge.Client/ -c Release -p:VersionSuffix=${{ inputs.tag }}
-      - run: dotnet pack -c Release --include-symbols --include-source --no-build -p:VersionPrefix=${{ inputs.tag }} -o ./publish/ ./src/GrpcWebSocketBridge.AspNetCore
-      - run: dotnet pack -c Release --include-symbols --include-source --no-build -p:VersionPrefix=${{ inputs.tag }} -o ./publish/ ./src/GrpcWebSocketBridge.Client
+      - run: dotnet pack -c Release --no-build -p:VersionPrefix=${{ inputs.tag }} --include-symbols --include-source -p:SymbolPackageFormat=snupkg -o ./publish/ ./src/GrpcWebSocketBridge.AspNetCore
+      - run: dotnet pack -c Release --no-build -p:VersionPrefix=${{ inputs.tag }} --include-symbols --include-source -p:SymbolPackageFormat=snupkg -o ./publish/ ./src/GrpcWebSocketBridge.Client
       - uses: Cysharp/Actions/.github/actions/upload-artifact@main
         with:
           name: nuget
@@ -67,13 +69,42 @@ jobs:
           UNITY_SERIAL: "op://${{ vars.OP_VAULT_ACTIONS_PUBLIC }}/UNITY_LICENSE/serial"
 
       - uses: Cysharp/Actions/.github/actions/checkout@main
+        with:
+          ref: ${{ needs.update-packagejson.outputs.sha }}
       - uses: Cysharp/Actions/.github/actions/check-metas@main # check meta files
         with:
           directory: tool/GrpcWebSocketBridge.Client.Unity
 
   # release
+  publish:
+    name: "Publish NuGet packages"
+    needs: [build, build-unity]
+    permissions:
+      contents: read
+      id-token: write # required for NuGet Trusted Publish
+    runs-on: ubuntu-24.04
+    timeout-minutes: 10
+    steps:
+      - uses: Cysharp/Actions/.github/actions/setup-dotnet@main
+      - uses: Cysharp/Actions/.github/actions/download-artifact@main
+      # push nuget
+      - name: NuGet login (OIDC)
+        uses: NuGet/login@8d196754b4036150537f80ac539e15c2f1028841 # v1.2.0
+        id: login
+        with:
+          user: ${{ secrets.NUGET_USER }}
+      - run: dotnet nuget push "./nuget/*.nupkg" --skip-duplicate -s https://api.nuget.org/v3/index.json -k "${NUGET_KEY}"
+        if: ${{ !inputs.dry-run }}
+        env:
+          NUGET_KEY: ${{ steps.login.outputs.NUGET_API_KEY }}
+      - run: dotnet nuget push "./nuget/*.snupkg" --skip-duplicate -s https://api.nuget.org/v3/index.json -k "${NUGET_KEY}"
+        if: ${{ !inputs.dry-run }}
+        env:
+          NUGET_KEY: ${{ steps.login.outputs.NUGET_API_KEY }}
+
+  # release
   create-release:
-    needs: [update-packagejson, build, build-unity]
+    needs: [update-packagejson, publish]
     permissions:
       contents: write
       id-token: write # required for NuGet Trusted Publish
@@ -82,7 +113,7 @@ jobs:
       commit-id: ${{ needs.update-packagejson.outputs.sha }}
       dry-run: ${{ inputs.dry-run }}
       tag: ${{ inputs.tag }}
-      nuget-push: true
+      nuget-push: false
       release-upload: false
       release-format: "{0}"
     secrets: inherit
