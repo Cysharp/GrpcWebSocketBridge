@@ -39,8 +39,8 @@ jobs:
       # Build & Pack
       - run: dotnet build ./src/GrpcWebSocketBridge.AspNetCore/ -c Release -p:VersionSuffix=${{ inputs.tag }}
       - run: dotnet build ./src/GrpcWebSocketBridge.Client/ -c Release -p:VersionSuffix=${{ inputs.tag }}
-      - run: dotnet pack -c Release --no-build -p:VersionPrefix=${{ inputs.tag }} -p:IncludeSymbols=true -p:SymbolPackageFormat=snupkg -o ./publish/ ./src/GrpcWebSocketBridge.AspNetCore
-      - run: dotnet pack -c Release --no-build -p:VersionPrefix=${{ inputs.tag }} -p:IncludeSymbols=true -p:SymbolPackageFormat=snupkg -o ./publish/ ./src/GrpcWebSocketBridge.Client
+      - run: dotnet pack -c Release --no-build -p:VersionPrefix=${{ inputs.tag }} --include-symbols --include-source -p:IncludeSymbols=true -p:SymbolPackageFormat=snupkg -o ./publish/ ./src/GrpcWebSocketBridge.AspNetCore
+      - run: dotnet pack -c Release --no-build -p:VersionPrefix=${{ inputs.tag }} --include-symbols --include-source -p:IncludeSymbols=true -p:SymbolPackageFormat=snupkg -o ./publish/ ./src/GrpcWebSocketBridge.Client
       - uses: Cysharp/Actions/.github/actions/upload-artifact@main
         with:
           name: nuget
