@@ -343,3 +343,6 @@ healthchecksdb
 
 # Unity
 !*.meta
+
+# macOS
+.DS_Store

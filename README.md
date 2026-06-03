@@ -26,7 +26,7 @@ Yet Another gRPC over HTTP/1 using WebSocket implementation, primarily targets .
     - When using with MagicOnion, use MagicOnion 7.0.0 or later
 ### Client
 - .NET 8 or later (Console, Blazor WebAssembly)
-- Unity 2022.3 or later
+- Unity 6.3 or later
   - We strongly recommend a newer version when trying WebGL builds, as older versions have behavioural issues.
 
 ## How to run a sample project
