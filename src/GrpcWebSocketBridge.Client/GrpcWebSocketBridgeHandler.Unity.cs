@@ -13,11 +13,11 @@ namespace GrpcWebSocketBridge.Client
     {
         private static PipeOptions PipeOptions { get; } = new PipeOptions(readerScheduler: PipeScheduler.Inline, writerScheduler: PipeScheduler.Inline, useSynchronizationContext: false);
 
-        private static IClientWebSocket CreateClientWebSocket() =>
+        private IClientWebSocket CreateClientWebSocket() =>
 #if UNITY_WEBGL && !UNITY_EDITOR
             new JsWebSocketsClientWebSocket();
 #else
-            new SystemNetWebSocketsClientWebSocket();
+            new SystemNetWebSocketsClientWebSocket(CookieContainer);
 #endif
 
        public GrpcWebSocketBridgeHandler(bool forceWebSocketMode = false)

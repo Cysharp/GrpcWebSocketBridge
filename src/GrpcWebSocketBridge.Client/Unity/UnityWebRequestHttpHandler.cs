@@ -57,9 +57,11 @@ namespace GrpcWebSocketBridge.Client.Unity
             };
 
             var responseHeader = response.Headers;
+            var contentHeader = response.Content.Headers;
             foreach (var header in webRequest.GetResponseHeaders())
             {
                 responseHeader.TryAddWithoutValidation(header.Key, header.Value);
+                contentHeader.TryAddWithoutValidation(header.Key, header.Value);
             }
 
             return response;

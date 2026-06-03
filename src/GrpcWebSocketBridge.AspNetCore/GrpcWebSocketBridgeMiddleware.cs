@@ -93,7 +93,6 @@ namespace GrpcWebSocketBridge.AspNetCore
             await readyToRunTask;
 
             var bufferArray = new byte[ReaderWriterBufferSize];
-            var isRequestCompleted = false;
             var isPipeCompleted = false;
 
             var reader = new GrpcWebSocketBufferReader();
@@ -101,14 +100,15 @@ namespace GrpcWebSocketBridge.AspNetCore
             var consumed = 0;
             try
             {
-                while (webSocket.State == WebSocketState.Open && !cancellationToken.IsCancellationRequested && !isRequestCompleted)
+                while (webSocket.State == WebSocketState.Open && !cancellationToken.IsCancellationRequested)
                 {
                     var result = await webSocket.ReceiveAsync(bufferArray, cancellationToken);
-                    if (result.MessageType != WebSocketMessageType.Binary) continue;
+                    if (result.MessageType != WebSocketMessageType.Binary)
+                        continue;
 
                     bufferWriter.Write(bufferArray.AsSpan(0, result.Count));
 
-                    while (reader.TryRead(bufferWriter.WrittenMemory.Slice(consumed), out var readResult))
+                    while (!isPipeCompleted && reader.TryRead(bufferWriter.WrittenMemory.Slice(consumed), out var readResult))
                     {
                         switch (readResult.Type)
                         {
@@ -125,7 +125,8 @@ namespace GrpcWebSocketBridge.AspNetCore
                                 await websocketPipeWriter.FlushAsync(cancellationToken);
                                 break;
                             case GrpcWebSocketBufferReader.BufferReadResultType.Trailer:
-                                isRequestCompleted = true;
+                                await websocketPipeWriter.CompleteAsync();
+                                isPipeCompleted = true;
                                 break;
                         }
 
@@ -147,7 +148,7 @@ namespace GrpcWebSocketBridge.AspNetCore
             catch (Exception e) when (e is ConnectionAbortedException || e is WebSocketException)
             {
                 // When the WebSocket connection has been closed, Ignore ConnectionAbortedException and WebSocketException.
-                if (!isRequestCompleted)
+                if (!isPipeCompleted)
                 {
                     await websocketPipeWriter.CompleteAsync(new IOException("The request was aborted.", e));
                     isPipeCompleted = true;
@@ -169,7 +170,7 @@ namespace GrpcWebSocketBridge.AspNetCore
             // Wait until the features are ready to run.
             await readyToRunTask;
 
-            using var stream = writerPipe.Reader.AsStream();
+            await using var stream = writerPipe.Reader.AsStream();
             var bufferArray = new byte[ReaderWriterBufferSize];
             var readLen = 0;
             while ((readLen = await stream.ReadAsync(bufferArray, cancellationToken)) > 0)

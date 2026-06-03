@@ -23,18 +23,18 @@
         var connection = connections[handle];
 
         connection.socket = new WebSocket(connections[handle].url, connections[handle].subProtocol);
-        
+
         connection.socket.binaryType = 'arraybuffer';
         connection.socket.onopen = function (e) {
-            dynCall('vi', connection.onConnected, [connection.id]);
+            getWasmTableEntry(connection.onConnected)(connection.id);
         };
         connection.socket.onclose = function (e) {
-            dynCall('viii', connection.onClose, [connection.id, e.code, e.wasClean ? 1 : 0]);
+            getWasmTableEntry(connection.onClose)(connection.id, e.code, e.wasClean ? 1 : 0);
         };
         connection.socket.onmessage = function (e) {
             var buffer = _malloc(e.data.byteLength);
             HEAPU8.set(new Uint8Array(e.data), buffer);
-            dynCall('viii', connection.onReceive, [connection.id, buffer, e.data.byteLength]);
+            getWasmTableEntry(connection.onReceive)(connection.id, buffer, e.data.byteLength);
             _free(buffer);
         };
     },

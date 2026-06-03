@@ -9,7 +9,7 @@ namespace GrpcWebSocketBridge.Client
     {
         private static PipeOptions PipeOptions { get; } = new PipeOptions();
 
-        private static IClientWebSocket CreateClientWebSocket() => new SystemNetWebSocketsClientWebSocket();
+        private IClientWebSocket CreateClientWebSocket() => new SystemNetWebSocketsClientWebSocket(CookieContainer);
 
 
         public GrpcWebSocketBridgeHandler(bool forceWebSocketMode = false)
