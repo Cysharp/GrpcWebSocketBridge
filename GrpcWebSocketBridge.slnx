@@ -18,9 +18,9 @@
     <File Path="README.md" />
   </Folder>
   <Folder Name="/Solution Items/GitHub Actions/">
-    <File Path=".github/workflows/build-canary.yml" />
-    <File Path=".github/workflows/build-pr.yml" />
-    <File Path=".github/workflows/build-release.yml" />
+    <File Path=".github/workflows/build-canary.yaml" />
+    <File Path=".github/workflows/build-pr.yaml" />
+    <File Path=".github/workflows/build-release.yaml" />
   </Folder>
   <Project Path="src/GrpcWebSocketBridge.AspNetCore/GrpcWebSocketBridge.AspNetCore.csproj" />
   <Project Path="src/GrpcWebSocketBridge.Client/GrpcWebSocketBridge.Client.csproj" />
