@@ -1,0 +1,28 @@
+<Solution>
+  <Folder Name="/Samples/">
+    <Project Path="samples/GrpcSampleApp.Client.BlazorWasm/GrpcSampleApp.Client.BlazorWasm.csproj" />
+    <Project Path="samples/GrpcSampleApp.Client.Console/GrpcSampleApp.Client.Console.csproj" />
+    <Project Path="samples/GrpcSampleApp.Server/GrpcSampleApp.Server.csproj" />
+  </Folder>
+  <Folder Name="/Samples/MagicOnionSampleApp/">
+    <Project Path="samples/MagicOnionSampleApp.Client.BlazorWasm/MagicOnionSampleApp.Client.BlazorWasm.csproj" />
+    <Project Path="samples/MagicOnionSampleApp.Client.Console/MagicOnionSampleApp.Client.Console.csproj" />
+    <Project Path="samples/MagicOnionSampleApp.Server/MagicOnionSampleApp.Server.csproj" />
+    <Project Path="samples/MagicOnionSampleApp.Shared/MagicOnionSampleApp.Shared.csproj" />
+  </Folder>
+  <Folder Name="/Solution Items/">
+    <File Path=".editorconfig" />
+    <File Path=".gitignore" />
+    <File Path="Directory.Build.props" />
+    <File Path="Directory.Packages.props" />
+    <File Path="README.md" />
+  </Folder>
+  <Folder Name="/Solution Items/GitHub Actions/">
+    <File Path=".github/workflows/build-canary.yaml" />
+    <File Path=".github/workflows/build-pr.yaml" />
+    <File Path=".github/workflows/build-release.yaml" />
+  </Folder>
+  <Project Path="src/GrpcWebSocketBridge.AspNetCore/GrpcWebSocketBridge.AspNetCore.csproj" />
+  <Project Path="src/GrpcWebSocketBridge.Client/GrpcWebSocketBridge.Client.csproj" />
+  <Project Path="tests/GrpcWebSocketBridge.Tests/GrpcWebSocketBridge.Tests.csproj" />
+</Solution>
