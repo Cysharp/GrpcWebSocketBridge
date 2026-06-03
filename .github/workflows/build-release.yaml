@@ -53,7 +53,7 @@ jobs:
       contents: read
     strategy:
       matrix:
-        unity: ["2022.3.55f1"]
+        unity: ["6000.3.16f1"]
     runs-on: ubuntu-24.04
     timeout-minutes: 15
     steps:
